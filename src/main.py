@@ -1,4 +1,4 @@
-## python C:\Users\aches\OneDrive\Desktop\ara\ara\src\main.py
+## python src/main.py
 
 """
 Main
