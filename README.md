@@ -34,3 +34,5 @@ To run the application, execute the following command in your terminal:
 ```
 python src/main.py
 ```
+
+Note: You may have to use python3 and pip3 if using the latest python version.
