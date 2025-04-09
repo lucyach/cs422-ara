@@ -1,11 +1,14 @@
 '''
 CLI: command-line interface
 '''
+import tkinter as tk
+from tkinter import ttk # For themed widgets
 
 import sys
 from pdf_manager import PDFManager
 from note_manager import NoteManager
 from database_manager import DatabaseManager
+
 
 class CLI:
     def __init__(self):  # Initialization of the CLI class
