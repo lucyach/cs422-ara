@@ -81,7 +81,7 @@ class AboutScreen(tk.Frame):
 
         description = tk.Label(
             self,
-            text="ARA helps students actively read using the SQ3R method.\nSurvey, Question, Read, Recite, Review.",
+            text="ARA helps students actively read using the SQ3R method.\nSurvey, Question, Read, Recite, Review.\n How it works",
             justify="center"
         )
         description.pack(pady=10)
