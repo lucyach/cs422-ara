@@ -10,13 +10,33 @@ import json
 
 # THIS IS YOUR MONGODB CREDENTIALS
 # DO NOT PUSH THIS TO GITHUB
-uri = "mongodb+srv://lgcgn:QQVj6CH4aF8AijCH@araproject.iepyikz.mongodb.net/?appName=ARAProject"
+uri = "mongodb+srv://USER:PASSWORD@araproject.iepyikz.mongodb.net/?appName=ARAProject"
 
 #COULD CREATE "FIRST TIME SETUP", SAVE CREDENTIALS LOCALLY (?)
 
 
 # In the process of moving things into a Database class,
 # Will see if this could be improved or is even needed
+
+def generate_random_string(length):
+    characters = string.ascii_letters + string.digits
+    random_string = ''.join(random.choice(characters) for _ in range(length))
+    return random_string
+
+class User:
+
+    def __init__(self):
+
+        FTS_completed = False
+        user_id = None
+        server_connection = False
+
+
+    def FirstTimeSetup(self):
+        user_id = generate_random_string(16)
+
+
+
 
 class Database:
     def __init__(self):
@@ -43,11 +63,6 @@ class Database:
 
 # Create a new client and connect to the server
 client = MongoClient(uri, server_api=ServerApi('1'))
-
-def generate_random_string(length):
-    characters = string.ascii_letters + string.digits
-    random_string = ''.join(random.choice(characters) for _ in range(length))
-    return random_string
 
 # Could designate an ID to each user, as a "login" method. Pull the corresponding notes from the server
 # Could also save this data locally to a file, as to not have the user save it manually, JSON maybe? CSV?
