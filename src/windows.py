@@ -33,14 +33,33 @@ class MainWindow:
 
         # Add buttons to the top frame
         tk.Button(self.button_frame, text="1. Load PDF", command=self.load_pdf, width=15).pack(side="left", padx=5, pady=5)
-        tk.Button(self.button_frame, text="2. Highlight Sections", command=self.highlight_sections, width=20).pack(side="left", padx=5, pady=5)
+        tk.Button(self.button_frame, text="2. SQ3R", command=self.sq3r, width=20).pack(side="left", padx=5, pady=5)
         tk.Button(self.button_frame, text="3. Create Note Hierarchy", command=self.create_note_hierarchy, width=20).pack(side="left", padx=5, pady=5)
         tk.Button(self.button_frame, text="4. Save Notes", command=self.save_notes, width=15).pack(side="left", padx=5, pady=5)
         tk.Button(self.button_frame, text="5. Load Notes", command=self.load_notes, width=15).pack(side="left", padx=5, pady=5)
         tk.Button(self.button_frame, text="6. Delete All Notes", command=self.delete_all_notes, width=20).pack(side="left", padx=5, pady=5)
 
         # Add widgets to the note-taking frame
-        tk.Label(self.note_frame, text="Notes", font=("Arial", 14), bg="lightgray").pack(pady=10)
+        tk.Label(self.note_frame, text="Notes", font=("Arial", 14), bg="lightgray").pack(pady=5)
+
+        # Add input boxes for chapter and section
+        chapter_frame = tk.Frame(self.note_frame, bg="lightgray")
+        chapter_frame.pack(pady=5, padx=10, fill="x")
+        tk.Label(chapter_frame, text="Chapter:", bg="lightgray").pack(side="left", padx=5)
+        self.chapter_entry = tk.Entry(chapter_frame, width=30)
+        self.chapter_entry.pack(side="left", padx=5)
+
+        section_frame = tk.Frame(self.note_frame, bg="lightgray")
+        section_frame.pack(pady=5, padx=10, fill="x")
+        tk.Label(section_frame, text="Section:", bg="lightgray").pack(side="left", padx=5)
+        self.section_entry = tk.Entry(section_frame, width=30)
+        self.section_entry.pack(side="left", padx=5)
+
+        # Add a button to load notes for the selected chapter and section
+        self.load_notes_button = tk.Button(self.note_frame, text="Begin Notetaking", command=self.load_notes_for_section, width=15)
+        self.load_notes_button.pack(pady=5)
+
+        # Add the note-taking text box
         self.note_text = tk.Text(self.note_frame, wrap="word", height=20)
         self.note_text.pack(expand=True, fill="both", padx=10, pady=10)
 
@@ -48,6 +67,7 @@ class MainWindow:
         tk.Label(self.pdf_frame, text="PDF Viewer", font=("Arial", 14), bg="white").pack(pady=10)
         self.pdf_display = tk.Text(self.pdf_frame, wrap="word", height=20, state="disabled", bg="white")
         self.pdf_display.pack(expand=True, fill="both", padx=10, pady=10)
+
 
     def load_pdf(self):
         """Load a PDF file."""
@@ -78,48 +98,110 @@ class MainWindow:
                 messagebox.showinfo("Highlighted Sections", "No matches found.")
 
     def create_note_hierarchy(self):
-        """Create a hierarchical structure for notes."""
-        chapter_title = simpledialog.askstring("Create Note Hierarchy", "Enter chapter title:")
-        section_heading = simpledialog.askstring("Create Note Hierarchy", "Enter section heading:")
-        if chapter_title and section_heading:
-            self.note_manager.create_note_hierarchy(chapter_title, section_heading, "")
-            # Display the chapter title and section heading in the note-taking text box
-            self.note_text.delete("1.0", "end")
-            self.note_text.insert("1.0", f"Chapter: {chapter_title}\nSection: {section_heading}\n\n")
-            messagebox.showinfo("Success", "Note hierarchy created.")
+        """Prepare the note-taking area for entering chapter and section information."""
+        # Clear the note-taking area
+        self.note_text.delete("1.0", "end")
+
+        messagebox.showinfo("Create Note Hierarchy", "Please enter the chapter title, section heading, and notes in the note-taking area.")
+        
 
 
     def save_notes(self):
         """Save notes to the database."""
-        chapter_title = simpledialog.askstring("Save Notes", "Enter chapter title:")
-        section_heading = simpledialog.askstring("Save Notes", "Enter section heading:")
-        notes = self.note_text.get("1.0", "end").strip()
-        if chapter_title and section_heading and notes:
-            self.note_manager.create_note_hierarchy(chapter_title, section_heading, notes)
-            messagebox.showinfo("Success", "Notes saved successfully.")
+        # Get the chapter and section from the input boxes
+        chapter_title = self.chapter_entry.get().strip()
+        section_heading = self.section_entry.get().strip()
+        notes = self.note_text.get("1.0", "end").strip()  # Get the content of the note-taking area
+
+        if not chapter_title:
+            messagebox.showwarning("Warning", "Chapter title cannot be empty.")
+            return
+
+        if not section_heading:
+            messagebox.showwarning("Warning", "Section heading cannot be empty.")
+            return
+
+        if not notes:
+            messagebox.showwarning("Warning", "The note-taking area is empty. Nothing to save.")
+            return
+
+        # Save the notes to the database
+        self.note_manager.create_note_hierarchy(chapter_title, section_heading, notes)
+        messagebox.showinfo("Success", "Notes saved successfully.")
+
+
 
     def load_notes(self):
-        """Load notes from the database."""
+        """Load notes from the database.
+        Loads all notes taken."""
         notes = self.note_manager.load_notes()
         if notes:
-            # Display all notes in the note-taking text box
+            # Format and display all notes in the note-taking text box
             notes_display = "\n\n".join(
                 f"Chapter: {row['chapter_title']}\nSection: {row['section_heading']}\nNotes: {row['notes']}"
                 for row in notes
             )
-            self.note_text.delete("1.0", "end")
-            self.note_text.insert("1.0", notes_display)
+            self.note_text.delete("1.0", "end")  # Clear the note-taking area
+            self.note_text.insert("1.0", notes_display)  # Insert loaded notes
             messagebox.showinfo("Loaded Notes", "Notes loaded into the note-taking area.")
         else:
-            self.note_text.delete("1.0", "end")
+            self.note_text.delete("1.0", "end")  # Clear the note-taking area
             messagebox.showinfo("Loaded Notes", "No notes found.")
-
+    
     def delete_all_notes(self):
         """Delete all notes and hierarchies."""
         if messagebox.askyesno("Delete All Notes", "Are you sure you want to delete all notes and hierarchies?"):
             self.note_manager.delete_all_notes()
-            self.note_text.delete("1.0", "end")
+            self.note_text.delete("1.0", "end")  # Clear the note-taking area
             messagebox.showinfo("Success", "All notes and hierarchies have been deleted.")
+
+    def load_notes_for_section(self):
+        """Load notes for the specified chapter and section."""
+        # Get the chapter and section from the input boxes
+        chapter_title = self.chapter_entry.get().strip()
+        section_heading = self.section_entry.get().strip()
+
+        if not chapter_title:
+            messagebox.showwarning("Warning", "Chapter title cannot be empty.")
+            return
+
+        if not section_heading:
+            messagebox.showwarning("Warning", "Section heading cannot be empty.")
+            return
+
+        # Query the database for the specified chapter and section
+        notes = self.note_manager.load_notes()
+        filtered_notes = [
+            row for row in notes
+            if row['chapter_title'] == chapter_title and row['section_heading'] == section_heading
+        ]
+
+        if filtered_notes:
+            # Display the notes in the note-taking text box
+            self.note_text.delete("1.0", "end")  # Clear the note-taking area
+            self.note_text.insert("1.0", filtered_notes[0]['notes'])  # Insert the notes
+            messagebox.showinfo("Loaded Notes", "Notes loaded for the specified chapter and section.")
+        else:
+            # Clear the note-taking area if no notes are found
+            self.note_text.delete("1.0", "end")
+            messagebox.showinfo("Loaded Notes", "No notes found for the specified chapter and section.")
+
+    def sq3r(self):
+        """Perform the SQ3R method."""
+        # Step 1: Survey
+        
+
+        # Step 2: Question
+        
+
+        # Step 3: Read
+        
+
+        # Step 4: Recite
+        
+
+        # Step 5: Review
+        
 
 
 # Create the main window
