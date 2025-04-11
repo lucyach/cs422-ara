@@ -55,6 +55,10 @@ class MainWindow:
         self.section_entry = tk.Entry(section_frame, width=30)
         self.section_entry.pack(side="left", padx=5)
 
+        # Add a button to load notes for the selected chapter and section
+        self.load_notes_button = tk.Button(self.note_frame, text="Begin Notetaking", command=self.load_notes_for_section, width=15)
+        self.load_notes_button.pack(pady=5)
+
         # Add the note-taking text box
         self.note_text = tk.Text(self.note_frame, wrap="word", height=20)
         self.note_text.pack(expand=True, fill="both", padx=10, pady=10)
@@ -150,6 +154,37 @@ class MainWindow:
             self.note_manager.delete_all_notes()
             self.note_text.delete("1.0", "end")  # Clear the note-taking area
             messagebox.showinfo("Success", "All notes and hierarchies have been deleted.")
+
+    def load_notes_for_section(self):
+        """Load notes for the specified chapter and section."""
+        # Get the chapter and section from the input boxes
+        chapter_title = self.chapter_entry.get().strip()
+        section_heading = self.section_entry.get().strip()
+
+        if not chapter_title:
+            messagebox.showwarning("Warning", "Chapter title cannot be empty.")
+            return
+
+        if not section_heading:
+            messagebox.showwarning("Warning", "Section heading cannot be empty.")
+            return
+
+        # Query the database for the specified chapter and section
+        notes = self.note_manager.load_notes()
+        filtered_notes = [
+            row for row in notes
+            if row['chapter_title'] == chapter_title and row['section_heading'] == section_heading
+        ]
+
+        if filtered_notes:
+            # Display the notes in the note-taking text box
+            self.note_text.delete("1.0", "end")  # Clear the note-taking area
+            self.note_text.insert("1.0", filtered_notes[0]['notes'])  # Insert the notes
+            messagebox.showinfo("Loaded Notes", "Notes loaded for the specified chapter and section.")
+        else:
+            # Clear the note-taking area if no notes are found
+            self.note_text.delete("1.0", "end")
+            messagebox.showinfo("Loaded Notes", "No notes found for the specified chapter and section.")
 
     def sq3r(self):
         """Perform the SQ3R method."""
