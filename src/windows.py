@@ -33,11 +33,21 @@ class MainWindow:
 
         # Add buttons to the top frame
         tk.Button(self.button_frame, text="1. Load PDF", command=self.load_pdf, width=15).pack(side="left", padx=5, pady=5)
-        tk.Button(self.button_frame, text="2. SQ3R", command=self.sq3r, width=20).pack(side="left", padx=5, pady=5)
-        tk.Button(self.button_frame, text="3. Create Note Hierarchy", command=self.create_note_hierarchy, width=20).pack(side="left", padx=5, pady=5)
-        tk.Button(self.button_frame, text="4. Save Notes", command=self.save_notes, width=15).pack(side="left", padx=5, pady=5)
-        tk.Button(self.button_frame, text="5. Load Notes", command=self.load_notes, width=15).pack(side="left", padx=5, pady=5)
-        tk.Button(self.button_frame, text="6. Delete All Notes", command=self.delete_all_notes, width=20).pack(side="left", padx=5, pady=5)
+        tk.Button(self.button_frame, text="2. Create Note Hierarchy", command=self.create_note_hierarchy, width=20).pack(side="left", padx=5, pady=5)
+        tk.Button(self.button_frame, text="3. Save Notes", command=self.save_notes, width=15).pack(side="left", padx=5, pady=5)
+        tk.Button(self.button_frame, text="4. Load Notes", command=self.load_notes, width=15).pack(side="left", padx=5, pady=5)
+        tk.Button(self.button_frame, text="5. Delete All Notes", command=self.delete_all_notes, width=20).pack(side="left", padx=5, pady=5)
+
+        # Prompts checkbox
+        self.sq3r_enabled = tk.BooleanVar(value=True)
+        self.prompt_toggle = tk.Checkbutton(
+            self.button_frame,
+            text="SQ3R Prompts",
+            variable=self.sq3r_enabled,
+            command=self.toggle_prompts
+        )
+        self.prompt_toggle.pack(side="left", padx=5, pady=5)
+
 
         # Add widgets to the note-taking frame
         tk.Label(self.note_frame, text="Notes", font=("Arial", 14), bg="lightgray").pack(pady=5)
@@ -68,6 +78,17 @@ class MainWindow:
         self.pdf_display = tk.Text(self.pdf_frame, wrap="word", height=20, state="disabled", bg="white")
         self.pdf_display.pack(expand=True, fill="both", padx=10, pady=10)
 
+        # Add prompt texts
+        self.prompt_labels = [
+            tk.Label(self.note_frame, text="SURVEY: Glance over the headings to get the big ideas.", anchor="w", bg="lightgray"),
+            tk.Label(self.note_frame, text="QUESTION: What questions do you want to answer?", anchor="w", bg="lightgray"),
+            tk.Label(self.note_frame, text="READ: Read to find answers and main points.", anchor="w", bg="lightgray"),
+            tk.Label(self.note_frame, text="RECITE: Write down what you remember.", anchor="w", bg="lightgray"),
+            tk.Label(self.note_frame, text="REVIEW: Summarize key ideas and test yourself.", anchor="w", bg="lightgray"),
+        ]
+
+        for label in self.prompt_labels:
+            label.pack(anchor="w", padx=10)
 
     def load_pdf(self):
         """Load a PDF file."""
@@ -186,23 +207,13 @@ class MainWindow:
             self.note_text.delete("1.0", "end")
             messagebox.showinfo("Loaded Notes", "No notes found for the specified chapter and section.")
 
-    def sq3r(self):
-        """Perform the SQ3R method."""
-        # Step 1: Survey
-        
-
-        # Step 2: Question
-        
-
-        # Step 3: Read
-        
-
-        # Step 4: Recite
-        
-
-        # Step 5: Review
-        
-
+    def toggle_prompts(self):
+        if self.sq3r_enabled.get():
+            for label in self.prompt_labels:
+                label.pack(anchor="w", padx=10)
+        else:
+            for label in self.prompt_labels:
+                label.pack_forget()
 
 # Create the main window
 if __name__ == "__main__":
