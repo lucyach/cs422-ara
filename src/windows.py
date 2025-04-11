@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 
-class ARAApp(tk.Tk):
+class ARA(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("ARA - Active Reading Assistant")
@@ -92,5 +92,5 @@ class AboutScreen(tk.Frame):
 
 # Run the application
 if __name__ == "__main__":
-    app = ARAApp()
+    app = ARA()
     app.mainloop()
