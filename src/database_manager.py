@@ -26,8 +26,8 @@ class DatabaseManager:
         """Save data to the database."""
         session = self.Session()
         try:
-            session.execute(text(query), params)
-            session.commit()  # Ensure the transaction is committed
+            session.execute(text(query), params)  # Ensure params is a dictionary
+            session.commit()  # Commit the transaction
             print("Data saved successfully.")
         except Exception as e:
             session.rollback()  # Rollback in case of an error
@@ -35,12 +35,14 @@ class DatabaseManager:
         finally:
             session.close()  # Ensure the session is closed
 
-    def load_data(self, query):
+    def load_data(self, query, params=None):
         """Load data from the database."""
         session = self.Session()
         try:
-            result = session.execute(text(query)).fetchall()  # Fetch all rows
-            return result
+            if params is None:
+                params = {}
+            result = session.execute(text(query), params)  # Pass params for parameterized queries
+            return [dict(row._mapping) for row in result]  # Use _mapping for dictionary-like access
         except Exception as e:
             print(f"Error loading data: {e}")
             return []
