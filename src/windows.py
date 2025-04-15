@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import messagebox, filedialog, simpledialog
 from pdf_manager import PDFManager
 from note_manager import NoteManager
-from database_manager import DatabaseManager
+from database_manager import DatabaseManager, User
 
 
 class MainWindow:
