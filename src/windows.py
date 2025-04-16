@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 
+<<<<<<< Updated upstream
 class ARA(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -42,10 +43,38 @@ class MainMenu(tk.Frame):
 
 
 class NotesScreen(tk.Frame):
+=======
+class ARA(tk.Tk): # main window that creates and stores all of the frames/"pages"
+    def __init__(self):
+        super().__init__()
+        self.title("ARA - Active Reading Assistant")
+        self.geometry("1000x1000")
+
+        self.frames = {}
+
+    #using frames keeps everything in one window, which keeps buttons and other components from overlapping
+
+        for F in (MainMenu, Notes, ServerSetup, About): #inisiates each frame "F" in a loop
+            frame = F(parent=self, controller=self)
+            self.frames[F] = frame   #adds the frames to a dictionary
+            frame.grid(row=0, column=0, sticky="nsew")
+
+        self.show_frame(MainMenu)
+
+
+
+    def show_frame(self, frame_class): # makes only one frame visible at a time, and is called witn controller
+        frame = self.frames[frame_class]
+        frame.tkraise()
+
+
+class MainMenu(tk.Frame):
+>>>>>>> Stashed changes
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
 
+<<<<<<< Updated upstream
         # Initialize managers
         #self.database_manager = DatabaseManager()
         #self.pdf_manager = PDFManager()
@@ -109,6 +138,54 @@ class NotesScreen(tk.Frame):
 
 
 class ServerSetupScreen(tk.Frame):
+=======
+        # Make the parent frame (self) expandable
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+
+        # Create a container to hold all widgets
+        container = tk.Frame(self)
+        container.grid(row=0, column=0, sticky="nsew")  # Center the container, not working
+
+        # Configure the container to center its content (STILL NOT CENTERING)
+        container.grid_rowconfigure(0, weight=1)
+        container.grid_columnconfigure(0, weight=1)
+
+        # Add widgets to the container
+        label = tk.Label(container, text="Welcome to ARA", font=("Arial", 20))
+        label.grid(row=0, column=0, pady=30)
+
+        notes_btn = tk.Button(container, text="Notes", width=20, command=lambda: controller.show_frame(Notes))
+        notes_btn.grid(row=1, column=0, pady=10)
+
+        server_btn = tk.Button(container, text="Server Setup", width=20, command=lambda: controller.show_frame(ServerSetup))
+        server_btn.grid(row=2, column=0, pady=10)
+
+        about_btn = tk.Button(container, text="About", width=20, command=lambda: controller.show_frame(About))
+        about_btn.grid(row=3, column=0, pady=10)
+
+        # Ensure the container itself is centered within the parent frame
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+
+class Notes(tk.Frame):   #need to create a colum for taking notes, and then column for the PDF
+    def __init__(self, parent, controller):
+        super().__init__(parent)
+        self.controller = controller
+
+        label = tk.Label(self, text="Notes Page", font=("Arial", 16))
+        label.pack(pady=20)
+
+        back_btn = tk.Button(self, text="Back to Menu", command=lambda: controller.show_frame(MainMenu))
+        back_btn.pack(pady=10)
+
+        # Box for note entry for now, but will have to be changed later 
+        note_entry = tk.Text(self, height=15, width=80)
+        note_entry.pack(pady=20)
+
+
+class ServerSetup(tk.Frame):
+>>>>>>> Stashed changes
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
@@ -119,12 +196,20 @@ class ServerSetupScreen(tk.Frame):
         back_btn = tk.Button(self, text="Back to Menu", command=lambda: controller.show_frame(MainMenu))
         back_btn.pack(pady=10)
 
+<<<<<<< Updated upstream
         # Placeholder server setup info
+=======
+        # Placeholder server setup info, will input later
+>>>>>>> Stashed changes
         instructions = tk.Label(self, text="Instructions or fields for setting up the server will go here.")
         instructions.pack(pady=10)
 
 
+<<<<<<< Updated upstream
 class AboutScreen(tk.Frame):
+=======
+class About(tk.Frame):
+>>>>>>> Stashed changes
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
@@ -134,7 +219,11 @@ class AboutScreen(tk.Frame):
 
         description = tk.Label(
             self,
+<<<<<<< Updated upstream
             text="ARA helps students actively read using the SQ3R method.\nSurvey, Question, Read, Recite, Review.\n How it works",
+=======
+            text="ARA helps students actively read using the SQ3R method.\nSurvey, Question, Read, Recite, Review.",
+>>>>>>> Stashed changes
             justify="center"
         )
         description.pack(pady=10)
