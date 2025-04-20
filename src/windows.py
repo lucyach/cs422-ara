@@ -119,6 +119,7 @@ class NotesScreen(tk.Frame):
         tk.Label(self.pdf_frame, text="PDF Viewer", font=("Arial", 14), bg="white").pack(pady=10)
         self.pdf_display = tk.Text(self.pdf_frame, wrap="word", height=20, state="disabled", bg="white")
         self.pdf_display.pack(expand=True, fill="both", padx=10, pady=10)
+        
 
         # SQ3R prompts
         self.prompt_labels = [
@@ -138,15 +139,23 @@ class NotesScreen(tk.Frame):
 
     # Methods from MainWindow class
     def load_pdf(self):
+        """Load a PDF file and display its content in the PDF viewer."""
         from tkinter import filedialog, messagebox
-        file_path = filedialog.askopenfilename(title="Select PDF File", filetypes=[("PDF Files", "*.pdf")])
+        file_path = filedialog.askopenfilename(
+            title="Select PDF File",
+            filetypes=[("PDF Files", "*.pdf")]
+        )
         if file_path:
             try:
+                # Use the PDFManager to load the PDF content
                 pdf_content = self.pdf_manager.load_pdf(file_path)
-                self.pdf_display.config(state="normal")
-                self.pdf_display.delete("1.0", "end")
-                self.pdf_display.insert("1.0", pdf_content)
-                self.pdf_display.config(state="disabled")
+
+                # Display the PDF content in the self.pdf_display widget
+                self.pdf_display.config(state="normal")  # Enable editing temporarily
+                self.pdf_display.delete("1.0", "end")  # Clear any existing content
+                self.pdf_display.insert("1.0", pdf_content)  # Insert the PDF content
+                self.pdf_display.config(state="disabled")  # Make the widget read-only
+
                 messagebox.showinfo("Success", "PDF loaded successfully.")
             except Exception as e:
                 messagebox.showerror("Error", f"Failed to load PDF: {e}")

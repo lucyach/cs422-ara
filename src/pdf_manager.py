@@ -8,26 +8,30 @@ It includes methods for loading PDFs, highlighting important sections, and extra
 import os
 import PyPDF2
 
-class PDFManager: # PDFManager class for managing PDF files
+class PDFManager:
     def __init__(self):
         self.pdf_content = ""
 
-    def load_pdf(self, file_path): # Load a PDF file
+    def load_pdf(self, file_path):
         """Load and parse a PDF file."""
-        if not os.path.exists(file_path): # Check if the file exists
+        if not os.path.exists(file_path):
             raise FileNotFoundError(f"The file {file_path} does not exist.")
-        
-        with open(file_path, 'rb') as file: # Open the PDF file in binary mode
+
+        with open(file_path, 'rb') as file:
             reader = PyPDF2.PdfReader(file)
             self.pdf_content = ""
-            for page in reader.pages: # Iterate through each page
-                self.pdf_content += page.extract_text() + "\n" # Extract text from the page
+            for page in reader.pages:
+                self.pdf_content += page.extract_text() + "\n"
         return self.pdf_content
 
-    def highlight_sections(self, keywords): # Highlight important sections in the PDF
-        """Highlight important sections for the survey phase."""
-        highlighted_sections = []
-        for line in self.pdf_content.splitlines(): # Split the content into lines
-            if any(keyword.lower() in line.lower() for keyword in keywords): # Check if any keyword is in the line
-                highlighted_sections.append(line)
-        return highlighted_sections
+    def get_page_text(self, file_path, page_number):
+        """Extract text from a specific page of the PDF."""
+        if not os.path.exists(file_path):
+            raise FileNotFoundError(f"The file {file_path} does not exist.")
+
+        with open(file_path, 'rb') as file:
+            reader = PyPDF2.PdfReader(file)
+            if page_number < 0 or page_number >= len(reader.pages):
+                raise ValueError(f"Page number {page_number} is out of range.")
+            return reader.pages[page_number].extract_text()
+        
