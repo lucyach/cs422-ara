@@ -86,6 +86,17 @@ class ARA(tk.Tk):
                         troughcolor=bg_dark,
                         bordercolor=border_color,
                         arrowcolor=fg_light)
+        
+        style.configure("TCheckbutton",
+                background=bg_dark,
+                foreground=fg_light,
+                font=("Segoe UI", 10),
+                focuscolor=accent_mint,
+                indicatorcolor=bg_light)
+
+        style.map("TCheckbutton",
+                background=[("active", accent_mint)],
+                foreground=[("active", "#000000")])
 
 class MainMenu(ttk.Frame):
     def __init__(self, parent, controller):
@@ -106,7 +117,12 @@ class MainMenu(ttk.Frame):
         content = ttk.Frame(container)
         content.grid(row=1, column=1)
 
-        label = ttk.Label(content, text="Welcome to ARA\nYour Active Reading Assistant", style="Title.TLabel", justify="center")
+        label = ttk.Label(content,
+                  text="Welcome to ARA\nYour Active Reading Assistant",
+                  font=("Segoe UI", 25, "bold"),  # override font inline
+                  foreground="#98ff98",           # optional: mint text
+                  background="#1e1e1e",           # match bg
+                  justify="center")
         label.pack(pady=20)
 
         ttk.Button(content, text="Notes", width=20, command=lambda: controller.show_frame(NotesScreen)).pack(pady=5)
