@@ -11,8 +11,7 @@ ara
 │   ├── pdf_manager.py        # Handles PDF operations
 │   ├── note_manager.py       # Manages hierarchical notes
 │   ├── server.py             # Sets up the command-line interface
-│   ├── database_manager.py    # Manages database operations
-│   └── cli.py                # Implements the command-line interface
+│   └── database_manager.py    # Manages database operations
 ├── requirements.txt          # Lists project dependencies
 └── README.md                 # Documentation for the project
 ```
