@@ -16,7 +16,6 @@ class ActiveReadingAssistant:
         self.database_manager = DatabaseManager()  # Initialize DatabaseManager
         self.pdf_manager = PDFManager()
         self.note_manager = NoteManager(self.database_manager)  # Pass DatabaseManager to NoteManager
-        self.cli = CLI()  # Updated to use CLI instead of Server
 
     def start(self):
         self.cli.run()  # Updated to call the CLI run method
