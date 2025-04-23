@@ -18,6 +18,7 @@ fg_light = "#f0f0f0"
 fg_dark = "#000000"
 accent_color = "#98ff98"
 
+# Global fonts
 title_font = "Segoe UI", 25, "bold"
 header_font = "Segoe UI", 14, "bold"
 text_font = "Segoe UI", 10
