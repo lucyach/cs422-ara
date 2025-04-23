@@ -62,10 +62,10 @@ class ARA(tk.Tk):
                         foreground=fg_light)
         
         style.configure("Title.TLabel",
-                background=bg_dark,
-                foreground=accent_mint,
-                font=("Segoe UI", 14, "bold"),
-                padding=10)
+                        background=bg_dark,
+                        foreground=accent_mint,
+                        font=("Segoe UI", 14, "bold"),
+                        padding=10)
 
         style.configure("TButton",
                         background=bg_medium,
@@ -73,8 +73,8 @@ class ARA(tk.Tk):
                         padding=6,
                         borderwidth=0)
         style.map("TButton",
-                background=[("active", accent_mint), ("pressed", "#80ffaa")],
-                foreground=[("active", "#000000")])
+                  background=[("active", accent_mint), ("pressed", "#80ffaa")],
+                  foreground=[("active", "#000000")])
 
         style.configure("TFrame",
                         background=bg_dark)
@@ -88,15 +88,15 @@ class ARA(tk.Tk):
                         arrowcolor=fg_light)
         
         style.configure("TCheckbutton",
-                background=bg_dark,
-                foreground=fg_light,
-                font=("Segoe UI", 10),
-                focuscolor=accent_mint,
-                indicatorcolor=bg_light)
+                        background=bg_dark,
+                        foreground=fg_light,
+                        font=("Segoe UI", 10),
+                        focuscolor=accent_mint,
+                        indicatorcolor=bg_light)
 
         style.map("TCheckbutton",
-                background=[("active", accent_mint)],
-                foreground=[("active", "#000000")])
+                  background=[("active", accent_mint)],
+                  foreground=[("active", "#000000")])
 
 class MainMenu(ttk.Frame):
     def __init__(self, parent, controller):
@@ -118,11 +118,11 @@ class MainMenu(ttk.Frame):
         content.grid(row=1, column=1)
 
         label = ttk.Label(content,
-                  text="Welcome to ARA\nYour Active Reading Assistant",
-                  font=("Segoe UI", 25, "bold"),  # override font inline
-                  foreground="#98ff98",           # optional: mint text
-                  background="#1e1e1e",           # match bg
-                  justify="center")
+                          text="Welcome to ARA\nYour Active Reading Assistant",
+                          font=("Segoe UI", 25, "bold"),  # override font inline for main title
+                          foreground="#98ff98",           
+                          background="#1e1e1e",           # match bg
+                          justify="center")
         label.pack(pady=20)
 
         ttk.Button(content, text="Notes", width=20, command=lambda: controller.show_frame(NotesScreen)).pack(pady=5)
@@ -168,33 +168,53 @@ class NotesScreen(ttk.Frame):
         chapter_frame = ttk.Frame(self.note_frame)
         chapter_frame.pack(pady=5, padx=10, fill="x")
         ttk.Label(chapter_frame, text="Chapter:").pack(side="left", padx=5)
-        self.chapter_entry = tk.Entry(chapter_frame, width=30, bg="#3a3a3a", fg="#f0f0f0",
-                              bd=0, relief="flat", highlightthickness=1,
-                              highlightbackground="#3a3a3a", highlightcolor="#98ff98")
+        self.chapter_entry = tk.Entry(chapter_frame, 
+                                      width=30, bg="#3a3a3a", 
+                                      fg="#f0f0f0",
+                                      bd=0, relief="flat", 
+                                      highlightthickness=1,
+                                      highlightbackground="#3a3a3a", 
+                                      highlightcolor="#98ff98")
         self.chapter_entry.pack(side="left", padx=5, pady=1)
 
 
         section_frame = ttk.Frame(self.note_frame)
         section_frame.pack(pady=5, padx=10, fill="x")
         ttk.Label(section_frame, text="Section:").pack(side="left", padx=5)
-        self.section_entry = tk.Entry(section_frame, width=30, bg="#3a3a3a", fg="#f0f0f0",
-                              bd=0, relief="flat", highlightthickness=1,
-                              highlightbackground="#3a3a3a", highlightcolor="#98ff98")
+        self.section_entry = tk.Entry(section_frame, 
+                                      width=30, bg="#3a3a3a", 
+                                      fg="#f0f0f0",
+                                      bd=0, relief="flat", highlightthickness=1,
+                                      highlightbackground="#3a3a3a", highlightcolor="#98ff98")
         self.section_entry.pack(side="left", padx=5, pady=1)
 
         # Button to load notes for the selected section
         self.load_notes_button = ttk.Button(self.note_frame, text="Begin Notetaking", command=self.load_notes_for_section, width=20)
         self.load_notes_button.pack(pady=5)
 
-        self.note_text = tk.Text(self.note_frame, wrap="word", bg="#3a3a3a", fg="#f0f0f0", bd=0, relief="flat", highlightthickness=1, highlightbackground="#3a3a3a", highlightcolor="#98ff98", height=20)
+        self.note_text = tk.Text(self.note_frame, 
+                                 wrap="word", 
+                                 bg="#3a3a3a", 
+                                 fg="#f0f0f0", bd=0, 
+                                 relief="flat", highlightthickness=1, 
+                                 highlightbackground="#3a3a3a",
+                                 highlightcolor="#98ff98", 
+                                 height=20)
+        
         self.note_text.pack(expand=True, fill="both", padx=10, pady=10)
 
         # PDF viewer
         ttk.Label(self.pdf_frame, text="PDF Viewer", style="Title.TLabel").pack(pady=10)
 
         # Add a canvas for displaying PDF content
-        self.canvas = tk.Canvas(self.pdf_frame, height=500, bg="#3a3a3a", bd=0, relief="flat",
-                        highlightthickness=1, highlightbackground="#3a3a3a", highlightcolor="#98ff98")
+        self.canvas = tk.Canvas(self.pdf_frame, 
+                                height=500, 
+                                bg="#3a3a3a", 
+                                bd=0, 
+                                relief="flat",
+                                highlightthickness=1, 
+                                highlightbackground="#3a3a3a", 
+                                highlightcolor="#98ff98")
         self.canvas.pack(side="top", fill="x", expand=False)  # Adjust to fit horizontally but not vertically
 
         # Add these attributes to track the current page and total pages
