@@ -2,7 +2,11 @@ import tkinter as tk
 from tkinter import messagebox, filedialog, simpledialog
 from pdf_manager import PDFManager
 from note_manager import NoteManager
-from database_manager import DatabaseManager
+from tkinter import filedialog, messagebox
+import tkinter as tk
+from PIL import Image, ImageTk
+
+## from database_manager import DatabaseManager
 
 class ARA(tk.Tk):
     def __init__(self):
@@ -64,9 +68,9 @@ class NotesScreen(tk.Frame):
         self.controller = controller
 
         # Initialize managers
-        self.database_manager = DatabaseManager()
+        # self.database_manager = DatabaseManager()
         self.pdf_manager = PDFManager()
-        self.note_manager = NoteManager(self.database_manager)
+        # self.note_manager = NoteManager(self.database_manager)
 
         # Layout frames
         self.button_frame = tk.Frame(self)
@@ -96,7 +100,7 @@ class NotesScreen(tk.Frame):
 
         # Notes section
         tk.Label(self.note_frame, text="Notes", font=("Arial", 14), bg="lightgray").pack(pady=5)
-        
+    
         chapter_frame = tk.Frame(self.note_frame, bg="lightgray")
         chapter_frame.pack(pady=5, padx=10, fill="x")
         tk.Label(chapter_frame, text="Chapter:", bg="lightgray").pack(side="left", padx=5)
@@ -117,8 +121,16 @@ class NotesScreen(tk.Frame):
 
         # PDF viewer
         tk.Label(self.pdf_frame, text="PDF Viewer", font=("Arial", 14), bg="white").pack(pady=10)
-        self.pdf_display = tk.Text(self.pdf_frame, wrap="word", height=20, state="disabled", bg="white")
-        self.pdf_display.pack(expand=True, fill="both", padx=10, pady=10)
+
+        # Add a canvas for displaying PDF content
+        self.canvas = tk.Canvas(self.pdf_frame, bg="white")
+        self.canvas.pack(side="left", fill="both", expand=True)
+
+        # Add a vertical scrollbar for the canvas
+        scroll_y = tk.Scrollbar(self.pdf_frame, orient="vertical", command=self.canvas.yview)
+        scroll_y.pack(side="right", fill="y")
+        self.canvas.config(yscrollcommand=scroll_y.set)
+
         
 
         # SQ3R prompts
@@ -140,25 +152,25 @@ class NotesScreen(tk.Frame):
     # Methods from MainWindow class
     def load_pdf(self):
         """Load a PDF file and display its content in the PDF viewer."""
-        from tkinter import filedialog, messagebox
         file_path = filedialog.askopenfilename(
             title="Select PDF File",
             filetypes=[("PDF Files", "*.pdf")]
         )
         if file_path:
             try:
-                # Use the PDFManager to load the PDF content
-                pdf_content = self.pdf_manager.load_pdf(file_path)
+                # Render the first page of the PDF as an image
+                img = self.pdf_manager.render_page_as_image(file_path, page_number=0, dpi=100)
 
-                # Display the PDF content in the self.pdf_display widget
-                self.pdf_display.config(state="normal")  # Enable editing temporarily
-                self.pdf_display.delete("1.0", "end")  # Clear any existing content
-                self.pdf_display.insert("1.0", pdf_content)  # Insert the PDF content
-                self.pdf_display.config(state="disabled")  # Make the widget read-only
+                # Convert the PIL image to a format compatible with Tkinter
+                self.tk_image = ImageTk.PhotoImage(img)
 
-                messagebox.showinfo("Success", "PDF loaded successfully.")
+                # Display the image on the canvas
+                self.canvas.delete("all")
+                self.canvas.create_image(0, 0, anchor="nw", image=self.tk_image)
+                self.canvas.config(scrollregion=self.canvas.bbox("all"))
             except Exception as e:
-                messagebox.showerror("Error", f"Failed to load PDF: {e}")
+                tk.messagebox.showerror("Error", f"Failed to load PDF: {e}")
+
 
 
     def create_note_hierarchy(self):

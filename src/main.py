@@ -8,7 +8,6 @@ Main
 import os
 from pdf_manager import PDFManager
 from note_manager import NoteManager
-from cli import CLI  # Corrected import from server to cli
 from database_manager import DatabaseManager
 
 # Main application structure
