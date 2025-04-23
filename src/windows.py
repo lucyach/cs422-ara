@@ -5,6 +5,7 @@ from note_manager import NoteManager
 from tkinter import filedialog, messagebox
 import tkinter as tk
 from PIL import Image, ImageTk
+import fitz  # PyMuPDF library for handling PDFs
 
 ## from database_manager import DatabaseManager
 
@@ -118,7 +119,7 @@ class NotesScreen(tk.Frame):
         self.load_notes_button = tk.Button(self.note_frame, text="Begin Notetaking", command=self.load_notes_for_section, width=15)
         self.load_notes_button.pack(pady=5)
 
-        # 
+        # Note-taking area
         self.note_text = tk.Text(self.note_frame, wrap="word", height=20)
         self.note_text.pack(expand=True, fill="both", padx=10, pady=10)
 
@@ -126,13 +127,23 @@ class NotesScreen(tk.Frame):
         tk.Label(self.pdf_frame, text="PDF Viewer", font=("Arial", 14), bg="white").pack(pady=10)
 
         # Add a canvas for displaying PDF content
-        self.canvas = tk.Canvas(self.pdf_frame, bg="white")
-        self.canvas.pack(side="left", fill="both", expand=True)
+        self.canvas = tk.Canvas(self.pdf_frame, bg="white", height=500)  # Set a fixed height for the canvas
+        self.canvas.pack(side="top", fill="x", expand=False)  # Adjust to fit horizontally but not vertically
 
-        # Add a vertical scrollbar for the canvas
-        scroll_y = tk.Scrollbar(self.pdf_frame, orient="vertical", command=self.canvas.yview)
-        scroll_y.pack(side="right", fill="y")
-        self.canvas.config(yscrollcommand=scroll_y.set)
+        # Add these attributes to track the current page and total pages
+        self.current_page = 0  # Track the current page
+        self.total_pages = 0  # Track the total number of pages
+        self.file_path = None  # Store the file path of the loaded PDF
+
+        # Add navigation buttons for the PDF viewer
+        nav_frame = tk.Frame(self.pdf_frame, bg="white")  # Create a frame for navigation buttons
+        nav_frame.pack(side="bottom", fill="x")  # Place it at the bottom of the PDF viewer
+
+        self.prev_button = tk.Button(nav_frame, text="Previous", command=self.show_previous_page, state="disabled")
+        self.prev_button.pack(side="left", padx=10, pady=5)  # Align to the left
+
+        self.next_button = tk.Button(nav_frame, text="Next", command=self.show_next_page, state="disabled")
+        self.next_button.pack(side="right", padx=10, pady=5)  # Align to the right
 
         # SQ3R prompts
         self.prompt_labels = [
@@ -151,33 +162,76 @@ class NotesScreen(tk.Frame):
         back_btn.grid(row=2, column=0, columnspan=2, pady=10)
 
     def load_pdf(self):
-        """Load a PDF file and display its content in the PDF viewer."""
+        """Load a PDF file and display its first page in the PDF viewer."""
         file_path = filedialog.askopenfilename(
             title="Select PDF File",
             filetypes=[("PDF Files", "*.pdf")]
         )
         if file_path:
             try:
-                # Render the first page of the PDF as an image
-                img = self.pdf_manager.render_page_as_image(file_path, page_number=0, dpi=100)
+                # Open the PDF and get the total number of pages
+                with fitz.open(file_path) as pdf:
+                    self.total_pages = len(pdf)
 
-                # Get the dimensions of the canvas
-                self.update_idletasks()  # Ensure the canvas dimensions are updated
-                canvas_width = self.canvas.winfo_width()
-                canvas_height = self.canvas.winfo_height()
+                # Reset to the first page
+                self.current_page = 0
+                self.file_path = file_path
 
-                # Resize the image to fit the canvas dimensions
-                img = img.resize((canvas_width, canvas_height), Image.Resampling.LANCZOS)
+                # Display the first page
+                self.display_page(self.current_page)
 
-                # Convert the PIL image to a format compatible with Tkinter
-                self.tk_image = ImageTk.PhotoImage(img)
-
-                # Display the image on the canvas
-                self.canvas.delete("all")
-                self.canvas.create_image(0, 0, anchor="nw", image=self.tk_image)
-                self.canvas.config(scrollregion=self.canvas.bbox("all"))
+                # Enable navigation buttons if there are multiple pages
+                if self.total_pages > 1:
+                    self.next_button.config(state="normal")
+                else:
+                    self.next_button.config(state="disabled")
+                self.prev_button.config(state="disabled")
             except Exception as e:
                 tk.messagebox.showerror("Error", f"Failed to load PDF: {e}")
+        
+    def display_page(self, page_number):
+        """Display a specific page of the PDF in the canvas."""
+        try:
+            # Render the page as an image
+            img = self.pdf_manager.render_page_as_image(self.file_path, page_number, dpi=100)
+
+            # Resize the image to fit the canvas dimensions
+            self.update_idletasks()  # Ensure the canvas dimensions are updated
+            canvas_width = self.canvas.winfo_width()
+            canvas_height = self.canvas.winfo_height()
+            img = img.resize((canvas_width, canvas_height), Image.Resampling.LANCZOS)
+
+            # Convert the PIL image to a format compatible with Tkinter
+            self.tk_image = ImageTk.PhotoImage(img)
+
+            # Display the image on the canvas
+            self.canvas.delete("all")
+            self.canvas.create_image(0, 0, anchor="nw", image=self.tk_image)
+            self.canvas.config(scrollregion=self.canvas.bbox("all"))
+        except Exception as e:
+            tk.messagebox.showerror("Error", f"Failed to display page: {e}")
+    
+    def show_next_page(self):
+        """Display the next page of the PDF."""
+        if self.current_page < self.total_pages - 1:
+            self.current_page += 1
+            self.display_page(self.current_page)
+
+            # Update navigation buttons
+            self.prev_button.config(state="normal")
+            if self.current_page == self.total_pages - 1:
+                self.next_button.config(state="disabled")
+
+    def show_previous_page(self):
+        """Display the previous page of the PDF."""
+        if self.current_page > 0:
+            self.current_page -= 1
+            self.display_page(self.current_page)
+
+            # Update navigation buttons
+            self.next_button.config(state="normal")
+            if self.current_page == 0:
+                self.prev_button.config(state="disabled")
 
     def create_note_hierarchy(self):
         from tkinter import messagebox
