@@ -98,6 +98,7 @@ class NotesScreen(tk.Frame):
         # Notes section
         tk.Label(self.note_frame, text="Notes", font=("Arial", 14), bg="lightgray").pack(pady=5)
         
+        # tk.Entry is used to create a text entry field
         chapter_frame = tk.Frame(self.note_frame, bg="lightgray")
         chapter_frame.pack(pady=5, padx=10, fill="x")
         tk.Label(chapter_frame, text="Chapter:", bg="lightgray").pack(side="left", padx=5)
@@ -248,12 +249,45 @@ class ServerSetupScreen(tk.Frame):
         label = tk.Label(self, text="Server Setup Page", font=("Arial", 16))
         label.pack(pady=20)
 
+        # Username label and entry
+        username_label = tk.Label(self, text="Username:")
+        username_label.pack(pady=5)
+        self.username_entry = tk.Entry(self)
+        self.username_entry.pack(pady=5)
+
+        # Password label and entry
+        password_label = tk.Label(self, text="Password:")
+        password_label.pack(pady=5)
+        self.password_entry = tk.Entry(self, show="*")  # Use 'show="*"' to mask the password
+        self.password_entry.pack(pady=5)
+
+        # Submit button
+        submit_btn = tk.Button(self, text="Submit", command=self.submit_credentials)
+        submit_btn.pack(pady=10)
+
+        #Back to the main menu button
         back_btn = tk.Button(self, text="Back to Menu", command=lambda: controller.show_frame(MainMenu))
         back_btn.pack(pady=10)
 
         # Placeholder server setup info
         instructions = tk.Label(self, text="Instructions or fields for setting up the server will go here.")
         instructions.pack(pady=10)
+
+
+
+    def submit_credentials(self):
+        # Retrieve the username and password entered by the user
+        username = self.username_entry.get()
+        password = self.password_entry.get()
+
+        # Add logic to handle the credentials for saving
+        print(f"Username: {username}, Password: {password}")
+
+            # Example: Show a message box (optional)
+        if username and password:
+            tk.messagebox.showinfo("Success", "Credentials submitted successfully!")
+        else:
+            tk.messagebox.showwarning("Error", "Please enter both username and password.")
 
 
 class AboutScreen(tk.Frame):
