@@ -90,7 +90,7 @@ class NotesScreen(tk.Frame):
         tk.Button(self.button_frame, text="5. Load Notes", command=self.load_notes, width=15).pack(side="left", padx=5, pady=5)
         tk.Button(self.button_frame, text="6. Delete All Notes", command=self.delete_all_notes, width=20).pack(side="left", padx=5, pady=5)
 
-        # SQ3R checkbox (where is this?)
+        # SQ3R checkbox prompts
         self.sq3r_enabled = tk.BooleanVar(value=True)
         self.prompt_toggle = tk.Checkbutton(self.button_frame, text="SQ3R Prompts", variable=self.sq3r_enabled, command=self.toggle_prompts)
         self.prompt_toggle.pack(side="left", padx=5, pady=5)
@@ -228,13 +228,16 @@ class NotesScreen(tk.Frame):
         self.note_text.delete("1.0", "end")
         messagebox.showinfo("No Notes", "No notes found for this chapter and section.")
 
+
+    # Toggle for the SQ3R prompts at the bottom of the window
     def toggle_prompts(self):
         if self.sq3r_enabled.get():
-            for label in self.prompt_labels:
-                label.pack(anchor="w", padx=10)
+            for checkbox in self.sq3r_checkboxes:
+                checkbox.pack(anchor="w", padx=10)
         else:
-            for label in self.prompt_labels:
-                label.pack_forget()
+            for checkbox in self.sq3r_checkboxes:
+                checkbox.pack_forget()
+
 
 
 class ServerSetupScreen(tk.Frame):
