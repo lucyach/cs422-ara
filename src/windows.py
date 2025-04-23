@@ -60,6 +60,12 @@ class ARA(tk.Tk):
         style.configure("TLabel",
                         background=bg_dark,
                         foreground=fg_light)
+        
+        style.configure("Title.TLabel",
+                background=bg_dark,
+                foreground=accent_mint,
+                font=("Segoe UI", 14, "bold"),
+                padding=10)
 
         style.configure("TButton",
                         background=bg_medium,
@@ -70,51 +76,8 @@ class ARA(tk.Tk):
                 background=[("active", accent_mint), ("pressed", "#80ffaa")],
                 foreground=[("active", "#000000")])
 
-        style.configure("TEntry",
-            fieldbackground=bg_light,    
-            background=bg_light,
-            foreground=fg_light,      
-            padding=4,
-            bordercolor=border_color, 
-            relief="flat",
-            borderwidth=1
-        )
-
         style.configure("TFrame",
                         background=bg_dark)
-
-        style.configure("TNotebook",
-                        background=bg_dark,
-                        borderwidth=0)
-        style.configure("TNotebook.Tab",
-                        background=bg_medium,
-                        foreground=fg_light,
-                        padding=[10, 4],
-                        borderwidth=0,
-                        focuscolor=accent_mint)
-        style.map("TNotebook.Tab",
-                background=[("selected", accent_mint)],
-                foreground=[("selected", "#000000")])
-
-        style.configure("Treeview",
-                        background=bg_medium,
-                        foreground=fg_light,
-                        fieldbackground=bg_medium,
-                        bordercolor=border_color)
-        style.map("Treeview",
-                background=[("selected", accent_mint)],
-                foreground=[("selected", "#000000")])
-
-        # Custom rounded button
-        style.configure("Rounded.TButton",
-                        background=accent_mint,
-                        foreground="#000000",
-                        padding=8,
-                        relief="flat",
-                        borderwidth=0,
-                        font=("Segoe UI", 10, "bold"))
-        style.map("Rounded.TButton",
-                background=[("active", "#baffba")])
 
         # Scrollbar (optional)
         style.configure("Vertical.TScrollbar",
@@ -143,7 +106,7 @@ class MainMenu(ttk.Frame):
         content = ttk.Frame(container)
         content.grid(row=1, column=1)
 
-        label = ttk.Label(content, text="Welcome to ARA\nYour Active Reading Assistant", style="Header.TLabel", justify="center")
+        label = ttk.Label(content, text="Welcome to ARA\nYour Active Reading Assistant", style="Title.TLabel", justify="center")
         label.pack(pady=20)
 
         ttk.Button(content, text="Notes", width=20, command=lambda: controller.show_frame(NotesScreen)).pack(pady=5)
@@ -184,7 +147,7 @@ class NotesScreen(ttk.Frame):
         self.prompt_toggle = ttk.Checkbutton(self.button_frame, text="SQ3R Prompts", variable=self.sq3r_enabled, command=self.toggle_prompts)
         self.prompt_toggle.pack(side="left", padx=5, pady=5)
 
-        ttk.Label(self.note_frame, text="Notes", style="Header.TLabel").pack(pady=5)
+        ttk.Label(self.note_frame, text="Notes", style="Title.TLabel").pack(pady=5)
 
         chapter_frame = ttk.Frame(self.note_frame)
         chapter_frame.pack(pady=5, padx=10, fill="x")
@@ -211,7 +174,7 @@ class NotesScreen(ttk.Frame):
         self.note_text.pack(expand=True, fill="both", padx=10, pady=10)
 
         # PDF viewer
-        ttk.Label(self.pdf_frame, text="PDF Viewer").pack(pady=10)
+        ttk.Label(self.pdf_frame, text="PDF Viewer", style="Title.TLabel").pack(pady=10)
 
         # Add a canvas for displaying PDF content
         self.canvas = tk.Canvas(self.pdf_frame, height=500, bg="#3a3a3a", bd=0, relief="flat",
