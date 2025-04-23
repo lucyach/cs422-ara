@@ -12,11 +12,10 @@ class ARA(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("ARA - Active Reading Assistant")
-        self.geometry("1000x700")
+        self.geometry("1100x700")
 
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
-
 
         self.frames = {}
 
@@ -68,23 +67,24 @@ class NotesScreen(tk.Frame):
         self.controller = controller
 
         # Initialize managers
-        # self.database_manager = DatabaseManager()
         self.pdf_manager = PDFManager()
-        # self.note_manager = NoteManager(self.database_manager)
 
         # Layout frames
         self.button_frame = tk.Frame(self)
         self.button_frame.grid(row=0, column=0, columnspan=2, sticky="ew")
 
-        self.note_frame = tk.Frame(self, bg="lightgray")
+        # Explicitly set the width of the note-taking box
+        self.note_frame = tk.Frame(self, bg="lightgray", width=250)  # Set the desired width
         self.note_frame.grid(row=1, column=0, sticky="nsew")
+        self.note_frame.grid_propagate(False)  # Prevent resizing based on content
 
         self.pdf_frame = tk.Frame(self, bg="white")
         self.pdf_frame.grid(row=1, column=1, sticky="nsew")
 
-        self.grid_rowconfigure(1, weight=1)
-        self.grid_columnconfigure(0, weight=1)
-        self.grid_columnconfigure(1, weight=1)
+        # Adjust column weights to allocate more space to the PDF viewer
+        self.grid_rowconfigure(1, weight=1) # Row for PDF viewer and note-taking box
+        self.grid_columnconfigure(0, weight=1)  # Note-taking box column
+        self.grid_columnconfigure(1, weight=4)  # PDF viewer column
 
         # Buttons
         tk.Button(self.button_frame, text="1. Load PDF", command=self.load_pdf, width=15).pack(side="left", padx=5, pady=5)
@@ -100,7 +100,8 @@ class NotesScreen(tk.Frame):
 
         # Notes section
         tk.Label(self.note_frame, text="Notes", font=("Arial", 14), bg="lightgray").pack(pady=5)
-    
+
+        # Entry fields for chapter and section
         chapter_frame = tk.Frame(self.note_frame, bg="lightgray")
         chapter_frame.pack(pady=5, padx=10, fill="x")
         tk.Label(chapter_frame, text="Chapter:", bg="lightgray").pack(side="left", padx=5)
@@ -113,9 +114,11 @@ class NotesScreen(tk.Frame):
         self.section_entry = tk.Entry(section_frame, width=30)
         self.section_entry.pack(side="left", padx=5)
 
+        # Button to load notes for the selected section
         self.load_notes_button = tk.Button(self.note_frame, text="Begin Notetaking", command=self.load_notes_for_section, width=15)
         self.load_notes_button.pack(pady=5)
 
+        # 
         self.note_text = tk.Text(self.note_frame, wrap="word", height=20)
         self.note_text.pack(expand=True, fill="both", padx=10, pady=10)
 
@@ -130,8 +133,6 @@ class NotesScreen(tk.Frame):
         scroll_y = tk.Scrollbar(self.pdf_frame, orient="vertical", command=self.canvas.yview)
         scroll_y.pack(side="right", fill="y")
         self.canvas.config(yscrollcommand=scroll_y.set)
-
-        
 
         # SQ3R prompts
         self.prompt_labels = [
@@ -149,7 +150,6 @@ class NotesScreen(tk.Frame):
         back_btn = tk.Button(self, text="Back to Main Menu", width=20, command=lambda: controller.show_frame(MainMenu))
         back_btn.grid(row=2, column=0, columnspan=2, pady=10)
 
-    # Methods from MainWindow class
     def load_pdf(self):
         """Load a PDF file and display its content in the PDF viewer."""
         file_path = filedialog.askopenfilename(
@@ -161,6 +161,14 @@ class NotesScreen(tk.Frame):
                 # Render the first page of the PDF as an image
                 img = self.pdf_manager.render_page_as_image(file_path, page_number=0, dpi=100)
 
+                # Get the dimensions of the canvas
+                self.update_idletasks()  # Ensure the canvas dimensions are updated
+                canvas_width = self.canvas.winfo_width()
+                canvas_height = self.canvas.winfo_height()
+
+                # Resize the image to fit the canvas dimensions
+                img = img.resize((canvas_width, canvas_height), Image.Resampling.LANCZOS)
+
                 # Convert the PIL image to a format compatible with Tkinter
                 self.tk_image = ImageTk.PhotoImage(img)
 
@@ -170,8 +178,6 @@ class NotesScreen(tk.Frame):
                 self.canvas.config(scrollregion=self.canvas.bbox("all"))
             except Exception as e:
                 tk.messagebox.showerror("Error", f"Failed to load PDF: {e}")
-
-
 
     def create_note_hierarchy(self):
         from tkinter import messagebox
