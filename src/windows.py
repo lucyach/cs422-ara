@@ -68,7 +68,7 @@ class NotesScreen(tk.Frame):
         self.pdf_manager = PDFManager()
         self.note_manager = NoteManager(self.database_manager)
 
-        # Layout frames
+        # Layout frames for buttons, notes, and PDF viewer
         self.button_frame = tk.Frame(self)
         self.button_frame.grid(row=0, column=0, columnspan=2, sticky="ew")
 
@@ -82,7 +82,7 @@ class NotesScreen(tk.Frame):
         self.grid_columnconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=1)
 
-        # Buttons
+        # Buttons at the top of the window
         tk.Button(self.button_frame, text="1. Load PDF", command=self.load_pdf, width=15).pack(side="left", padx=5, pady=5)
         tk.Button(self.button_frame, text="2. Highlight Sections", command=self.highlight_sections, width=20).pack(side="left", padx=5, pady=5)
         tk.Button(self.button_frame, text="3. Create Note Hierarchy", command=self.create_note_hierarchy, width=20).pack(side="left", padx=5, pady=5)
@@ -90,7 +90,7 @@ class NotesScreen(tk.Frame):
         tk.Button(self.button_frame, text="5. Load Notes", command=self.load_notes, width=15).pack(side="left", padx=5, pady=5)
         tk.Button(self.button_frame, text="6. Delete All Notes", command=self.delete_all_notes, width=20).pack(side="left", padx=5, pady=5)
 
-        # SQ3R checkbox
+        # SQ3R checkbox (where is this?)
         self.sq3r_enabled = tk.BooleanVar(value=True)
         self.prompt_toggle = tk.Checkbutton(self.button_frame, text="SQ3R Prompts", variable=self.sq3r_enabled, command=self.toggle_prompts)
         self.prompt_toggle.pack(side="left", padx=5, pady=5)
@@ -121,19 +121,27 @@ class NotesScreen(tk.Frame):
         self.pdf_display = tk.Text(self.pdf_frame, wrap="word", height=20, state="disabled", bg="white")
         self.pdf_display.pack(expand=True, fill="both", padx=10, pady=10)
 
-        # SQ3R prompts
-        self.prompt_labels = [
-            tk.Label(self.note_frame, text="SURVEY: Glance over the headings to get the big ideas.", anchor="w", bg="lightgray"),
-            tk.Label(self.note_frame, text="QUESTION: What questions do you want to answer?", anchor="w", bg="lightgray"),
-            tk.Label(self.note_frame, text="READ: Read to find answers and main points.", anchor="w", bg="lightgray"),
-            tk.Label(self.note_frame, text="RECITE: Write down what you remember.", anchor="w", bg="lightgray"),
-            tk.Label(self.note_frame, text="REVIEW: Summarize key ideas and test yourself.", anchor="w", bg="lightgray"),
+        # SQ3R checkbox prompts instead of just labels 
+        self.sq3r_check_vars = []
+        self.sq3r_checkboxes = []
+
+        sq3r_texts = [
+            "SURVEY: Glance over the headings to get the big ideas.",
+            "QUESTION: What questions do you want to answer?",
+            "READ: Read to find answers and main points.",
+            "RECITE: Write down what you remember.",
+            "REVIEW: Summarize key ideas and test yourself."
         ]
 
-        for label in self.prompt_labels:
-            label.pack(anchor="w", padx=10)
+        for text in sq3r_texts:
+            var = tk.BooleanVar()
+            checkbox = tk.Checkbutton(self.note_frame, text=text, variable=var, anchor="w", bg="lightgray", wraplength=400, justify="left")
+            checkbox.pack(anchor="w", padx=10)
+            self.sq3r_check_vars.append(var)
+            self.sq3r_checkboxes.append(checkbox)
 
-        # Back button
+
+        # Back to thhe main menu button
         back_btn = tk.Button(self, text="Back to Main Menu", width=20, command=lambda: controller.show_frame(MainMenu))
         back_btn.grid(row=2, column=0, columnspan=2, pady=10)
 
