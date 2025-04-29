@@ -1,19 +1,19 @@
 import tkinter as tk
-from tkinter import messagebox, filedialog, simpledialog
+from tkinter import filedialog
 from pdf_manager import PDFManager
 from note_manager import NoteManager
-from tkinter import filedialog, messagebox
-import tkinter as tk
 from PIL import Image, ImageTk
 import fitz  # PyMuPDF library for handling PDFs
-
-## from database_manager import DatabaseManager
+from database_manager import DatabaseManager
 
 class ARA(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("ARA - Active Reading Assistant")
         self.geometry("1100x700")
+
+        # Initialize DatabaseManager
+        self.database_manager = DatabaseManager()
 
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
@@ -69,6 +69,9 @@ class NotesScreen(tk.Frame):
 
         # Initialize managers
         self.pdf_manager = PDFManager()
+        self.pdf_manager = PDFManager()
+        self.note_manager = NoteManager(controller.database_manager)  # Pass the database_manager from the controller
+
 
         # Layout frames
         self.button_frame = tk.Frame(self)
