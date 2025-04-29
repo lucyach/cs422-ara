@@ -1,10 +1,28 @@
 import tkinter as tk
-from tkinter import filedialog
+from tkinter import messagebox, filedialog
+from tkinter import ttk
 from pdf_manager import PDFManager
 from note_manager import NoteManager
+from tkinter import filedialog, messagebox
+import tkinter as tk
 from PIL import Image, ImageTk
 import fitz  # PyMuPDF library for handling PDFs
-from database_manager import DatabaseManager
+
+## from database_manager import DatabaseManager
+
+# Global colors
+bg_dark = "#1e1e1e"
+bg_medium = "#2c2c2c"
+bg_light = "#3a3a3a"
+fg_light = "#f0f0f0"
+fg_dark = "#000000"
+accent_color = "#98ff98"
+
+# Global fonts
+title_font = "Segoe UI", 25, "bold"
+header_font = "Segoe UI", 14, "bold"
+text_font = "Segoe UI", 10
+
 
 class ARA(tk.Tk):
     def __init__(self):
@@ -12,11 +30,9 @@ class ARA(tk.Tk):
         self.title("ARA - Active Reading Assistant")
         self.geometry("1100x700")
 
-        # Initialize DatabaseManager
-        self.database_manager = DatabaseManager()
-
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
+        self.setup_custom_theme()
 
         self.frames = {}
 
@@ -31,58 +47,113 @@ class ARA(tk.Tk):
         frame = self.frames[frame_class]
         frame.tkraise()
 
+    def setup_custom_theme(self):
+        style = ttk.Style()
 
-class MainMenu(tk.Frame):
+        # Use a base theme with support for custom styling
+        style.theme_use("clam")
+
+        # General window background
+        self.configure(bg=bg_dark)
+
+        # Set default styles for all ttk widgets
+        style.configure(".", 
+                        background=bg_medium,
+                        foreground=fg_light,
+                        font=(text_font),
+                        relief="flat")
+
+        style.configure("TLabel",
+                        background=bg_dark,
+                        foreground=fg_light)
+        
+        style.configure("Header.TLabel",
+                        background=bg_dark,
+                        foreground=accent_color,
+                        font=(header_font),
+                        padding=10)
+        
+        style.configure("Title.TLabel",
+                background=bg_dark,
+                foreground=accent_color,
+                font=(title_font),
+                padding=10,
+                justify="center")
+
+
+        style.configure("TButton",
+                        background=bg_medium,
+                        foreground=fg_light,
+                        padding=6,
+                        borderwidth=0)
+        style.map("TButton",
+                  background=[("active", accent_color)],
+                  foreground=[("active", fg_dark)])
+
+        style.configure("TFrame",
+                        background=bg_dark)
+
+        # Scrollbar (optional)
+        style.configure("Vertical.TScrollbar",
+                        gripcount=0,
+                        background=bg_medium,
+                        troughcolor=bg_dark,
+                        bordercolor=bg_light,
+                        arrowcolor=fg_light)
+        
+        style.configure("TCheckbutton",
+                        background=bg_dark,
+                        foreground=fg_light,
+                        font=(text_font),
+                        focuscolor=accent_color,
+                        indicatorcolor=bg_light)
+
+        style.map("TCheckbutton",
+                  background=[("active", accent_color)],
+                  foreground=[("active", fg_dark)])
+
+class MainMenu(ttk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
 
-        # Make the MainMenu frame expand
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
 
-        # Create a container frame that will hold the content
-        container = tk.Frame(self)
+        container = ttk.Frame(self)
         container.grid(row=0, column=0, sticky="nsew")
 
-        # Center container content using another grid
         container.grid_rowconfigure(0, weight=1)
         container.grid_rowconfigure(2, weight=1)
         container.grid_columnconfigure(0, weight=1)
         container.grid_columnconfigure(2, weight=1)
 
-        content = tk.Frame(container)
+        content = ttk.Frame(container)
         content.grid(row=1, column=1)
 
-        # Your label and buttons inside content
-        label = tk.Label(content, text="Welcome to ARA\nYour Active Reading Assistant", font=("Arial", 20), justify="center")
+        label = ttk.Label(content, text="Welcome to ARA\nYour Active Reading Assistant", style="Title.TLabel")
         label.pack(pady=20)
 
-        tk.Button(content, text="Notes", width=20, command=lambda: controller.show_frame(NotesScreen)).pack(pady=5)
-        tk.Button(content, text="Server Setup", width=20, command=lambda: controller.show_frame(ServerSetupScreen)).pack(pady=5)
-        tk.Button(content, text="About", width=20, command=lambda: controller.show_frame(AboutScreen)).pack(pady=5)
+        ttk.Button(content, text="Notes", width=20, command=lambda: controller.show_frame(NotesScreen)).pack(pady=5)
+        ttk.Button(content, text="Server Setup", width=20, command=lambda: controller.show_frame(ServerSetupScreen)).pack(pady=5)
+        ttk.Button(content, text="About", width=20, command=lambda: controller.show_frame(AboutScreen)).pack(pady=5)
 
-class NotesScreen(tk.Frame):
+class NotesScreen(ttk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
 
-        # Initialize managers
         self.pdf_manager = PDFManager()
-        self.pdf_manager = PDFManager()
-        self.note_manager = NoteManager(controller.database_manager)  # Pass the database_manager from the controller
 
-
-        # Layout frames
-        self.button_frame = tk.Frame(self)
+        self.button_frame = ttk.Frame(self)
         self.button_frame.grid(row=0, column=0, columnspan=2, sticky="ew")
 
         # Explicitly set the width of the note-taking box
-        self.note_frame = tk.Frame(self, bg="lightgray", width=250)  # Set the desired width
+        self.note_frame = ttk.Frame(self, width=250)  # Set the desired width
         self.note_frame.grid(row=1, column=0, sticky="nsew")
         self.note_frame.grid_propagate(False)  # Prevent resizing based on content
 
-        self.pdf_frame = tk.Frame(self, bg="white")
+        self.pdf_frame = ttk.Frame(self)
         self.pdf_frame.grid(row=1, column=1, sticky="nsew")
 
         # Adjust column weights to allocate more space to the PDF viewer
@@ -91,46 +162,68 @@ class NotesScreen(tk.Frame):
         self.grid_columnconfigure(1, weight=4)  # PDF viewer column
 
         # Buttons
-        tk.Button(self.button_frame, text="1. Load PDF", command=self.load_pdf, width=15).pack(side="left", padx=5, pady=5)
-        tk.Button(self.button_frame, text="2. Create Note Hierarchy", command=self.create_note_hierarchy, width=20).pack(side="left", padx=5, pady=5)
-        tk.Button(self.button_frame, text="3. Save Notes", command=self.save_notes, width=15).pack(side="left", padx=5, pady=5)
-        tk.Button(self.button_frame, text="4. Load Notes", command=self.load_notes, width=15).pack(side="left", padx=5, pady=5)
-        tk.Button(self.button_frame, text="5. Delete All Notes", command=self.delete_all_notes, width=20).pack(side="left", padx=5, pady=5)
+        ttk.Button(self.button_frame, text="1. Load PDF", command=self.load_pdf, width=15).pack(side="left", padx=5, pady=5)
+        ttk.Button(self.button_frame, text="2. Create Note Hierarchy", command=self.create_note_hierarchy, width=20).pack(side="left", padx=5, pady=5)
+        ttk.Button(self.button_frame, text="3. Save Notes", command=self.save_notes, width=15).pack(side="left", padx=5, pady=5)
+        ttk.Button(self.button_frame, text="4. Load Notes", command=self.load_notes, width=15).pack(side="left", padx=5, pady=5)
+        ttk.Button(self.button_frame, text="5. Delete All Notes", command=self.delete_all_notes, width=20).pack(side="left", padx=5, pady=5)
 
-        # SQ3R checkbox
         self.sq3r_enabled = tk.BooleanVar(value=True)
-        self.prompt_toggle = tk.Checkbutton(self.button_frame, text="SQ3R Prompts", variable=self.sq3r_enabled, command=self.toggle_prompts)
+        self.prompt_toggle = ttk.Checkbutton(self.button_frame, text="SQ3R Prompts", variable=self.sq3r_enabled, command=self.toggle_prompts)
         self.prompt_toggle.pack(side="left", padx=5, pady=5)
 
-        # Notes section
-        tk.Label(self.note_frame, text="Notes", font=("Arial", 14), bg="lightgray").pack(pady=5)
+        ttk.Label(self.note_frame, text="Notes", style="Header.TLabel").pack(pady=5)
 
-        # Entry fields for chapter and section
-        chapter_frame = tk.Frame(self.note_frame, bg="lightgray")
+        chapter_frame = ttk.Frame(self.note_frame)
         chapter_frame.pack(pady=5, padx=10, fill="x")
-        tk.Label(chapter_frame, text="Chapter:", bg="lightgray").pack(side="left", padx=5)
-        self.chapter_entry = tk.Entry(chapter_frame, width=30)
-        self.chapter_entry.pack(side="left", padx=5)
+        ttk.Label(chapter_frame, text="Chapter:").pack(side="left", padx=5)
+        self.chapter_entry = tk.Entry(chapter_frame, 
+                                      width=30, bg=bg_light, 
+                                      fg=fg_light,
+                                      bd=0, relief="flat", 
+                                      highlightthickness=1,
+                                      highlightbackground=bg_light, 
+                                      highlightcolor=accent_color)
+        self.chapter_entry.pack(side="left", padx=5, pady=1)
 
-        section_frame = tk.Frame(self.note_frame, bg="lightgray")
+
+        section_frame = ttk.Frame(self.note_frame)
         section_frame.pack(pady=5, padx=10, fill="x")
-        tk.Label(section_frame, text="Section:", bg="lightgray").pack(side="left", padx=5)
-        self.section_entry = tk.Entry(section_frame, width=30)
-        self.section_entry.pack(side="left", padx=5)
+        ttk.Label(section_frame, text="Section:").pack(side="left", padx=5)
+        self.section_entry = tk.Entry(section_frame, 
+                                      width=30, bg=bg_light, 
+                                      fg=fg_light,
+                                      bd=0, relief="flat", highlightthickness=1,
+                                      highlightbackground=bg_light, highlightcolor=accent_color)
+        self.section_entry.pack(side="left", padx=5, pady=1)
 
         # Button to load notes for the selected section
-        self.load_notes_button = tk.Button(self.note_frame, text="Begin Notetaking", command=self.load_notes_for_section, width=15)
+        self.load_notes_button = ttk.Button(self.note_frame, text="Begin Notetaking", command=self.load_notes_for_section, width=20)
         self.load_notes_button.pack(pady=5)
 
-        # Note-taking area
-        self.note_text = tk.Text(self.note_frame, wrap="word", height=20)
+        self.note_text = tk.Text(self.note_frame, 
+                                 wrap="word", 
+                                 bg=bg_light, 
+                                 fg=fg_light, bd=0, 
+                                 relief="flat", highlightthickness=1, 
+                                 highlightbackground=bg_light,
+                                 highlightcolor=accent_color, 
+                                 height=20)
+        
         self.note_text.pack(expand=True, fill="both", padx=10, pady=10)
 
         # PDF viewer
-        tk.Label(self.pdf_frame, text="PDF Viewer", font=("Arial", 14), bg="white").pack(pady=10)
+        ttk.Label(self.pdf_frame, text="PDF Viewer", style="Header.TLabel").pack(pady=10)
 
         # Add a canvas for displaying PDF content
-        self.canvas = tk.Canvas(self.pdf_frame, bg="white", height=500)  # Set a fixed height for the canvas
+        self.canvas = tk.Canvas(self.pdf_frame, 
+                                height=500, 
+                                bg=bg_light, 
+                                bd=0, 
+                                relief="flat",
+                                highlightthickness=1, 
+                                highlightbackground=bg_light, 
+                                highlightcolor=accent_color)
         self.canvas.pack(side="top", fill="x", expand=False)  # Adjust to fit horizontally but not vertically
 
         # Add these attributes to track the current page and total pages
@@ -139,29 +232,28 @@ class NotesScreen(tk.Frame):
         self.file_path = None  # Store the file path of the loaded PDF
 
         # Add navigation buttons for the PDF viewer
-        nav_frame = tk.Frame(self.pdf_frame, bg="white")  # Create a frame for navigation buttons
+        nav_frame = ttk.Frame(self.pdf_frame)  # Create a frame for navigation buttons
         nav_frame.pack(side="bottom", fill="x")  # Place it at the bottom of the PDF viewer
 
-        self.prev_button = tk.Button(nav_frame, text="Previous", command=self.show_previous_page, state="disabled")
+        self.prev_button = ttk.Button(nav_frame, text="Previous", command=self.show_previous_page, state="disabled")
         self.prev_button.pack(side="left", padx=10, pady=5)  # Align to the left
 
-        self.next_button = tk.Button(nav_frame, text="Next", command=self.show_next_page, state="disabled")
+        self.next_button = ttk.Button(nav_frame, text="Next", command=self.show_next_page, state="disabled")
         self.next_button.pack(side="right", padx=10, pady=5)  # Align to the right
 
         # SQ3R prompts
         self.prompt_labels = [
-            tk.Label(self.note_frame, text="SURVEY: Glance over the headings to get the big ideas.", anchor="w", bg="lightgray"),
-            tk.Label(self.note_frame, text="QUESTION: What questions do you want to answer?", anchor="w", bg="lightgray"),
-            tk.Label(self.note_frame, text="READ: Read to find answers and main points.", anchor="w", bg="lightgray"),
-            tk.Label(self.note_frame, text="RECITE: Write down what you remember.", anchor="w", bg="lightgray"),
-            tk.Label(self.note_frame, text="REVIEW: Summarize key ideas and test yourself.", anchor="w", bg="lightgray"),
+            ttk.Label(self.note_frame, text="SURVEY: Glance over the headings to get the big ideas."),
+            ttk.Label(self.note_frame, text="QUESTION: What questions do you want to answer?"),
+            ttk.Label(self.note_frame, text="READ: Read to find answers and main points."),
+            ttk.Label(self.note_frame, text="RECITE: Write down what you remember."),
+            ttk.Label(self.note_frame, text="REVIEW: Summarize key ideas and test yourself."),
         ]
 
         for label in self.prompt_labels:
             label.pack(anchor="w", padx=10)
 
-        # Back button
-        back_btn = tk.Button(self, text="Back to Main Menu", width=20, command=lambda: controller.show_frame(MainMenu))
+        back_btn = ttk.Button(self, text="Back to Main Menu", width=20, command=lambda: controller.show_frame(MainMenu))
         back_btn.grid(row=2, column=0, columnspan=2, pady=10)
 
     def load_pdf(self):
@@ -190,7 +282,7 @@ class NotesScreen(tk.Frame):
                     self.next_button.config(state="disabled")
                 self.prev_button.config(state="disabled")
             except Exception as e:
-                tk.messagebox.showerror("Error", f"Failed to load PDF: {e}")
+                ttk.messagebox.showerror("Error", f"Failed to load PDF: {e}")
         
     def display_page(self, page_number):
         """Display a specific page of the PDF in the canvas."""
@@ -212,7 +304,7 @@ class NotesScreen(tk.Frame):
             self.canvas.create_image(0, 0, anchor="nw", image=self.tk_image)
             self.canvas.config(scrollregion=self.canvas.bbox("all"))
         except Exception as e:
-            tk.messagebox.showerror("Error", f"Failed to display page: {e}")
+            ttk.messagebox.showerror("Error", f"Failed to display page: {e}")
     
     def show_next_page(self):
         """Display the next page of the PDF."""
@@ -237,25 +329,20 @@ class NotesScreen(tk.Frame):
                 self.prev_button.config(state="disabled")
 
     def create_note_hierarchy(self):
-        from tkinter import messagebox
         self.note_text.delete("1.0", "end")
         messagebox.showinfo("Create Note Hierarchy", "Please enter the chapter title, section heading, and notes in the note-taking area.")
 
     def save_notes(self):
-        from tkinter import messagebox
         chapter = self.chapter_entry.get().strip()
         section = self.section_entry.get().strip()
         notes = self.note_text.get("1.0", "end").strip()
-
         if not chapter or not section or not notes:
             messagebox.showwarning("Warning", "All fields must be filled out to save notes.")
             return
-
         self.note_manager.create_note_hierarchy(chapter, section, notes)
         messagebox.showinfo("Success", "Notes saved successfully.")
 
     def load_notes(self):
-        from tkinter import messagebox
         notes = self.note_manager.load_notes()
         if notes:
             display = "\n\n".join(
@@ -268,14 +355,12 @@ class NotesScreen(tk.Frame):
             messagebox.showinfo("Loaded Notes", "No notes found.")
 
     def delete_all_notes(self):
-        from tkinter import messagebox
         if messagebox.askyesno("Delete All Notes", "Are you sure you want to delete all notes?"):
             self.note_manager.delete_all_notes()
             self.note_text.delete("1.0", "end")
             messagebox.showinfo("Success", "All notes deleted.")
 
     def load_notes_for_section(self):
-        from tkinter import messagebox
         chapter = self.chapter_entry.get().strip()
         section = self.section_entry.get().strip()
         if not chapter or not section:
@@ -287,9 +372,6 @@ class NotesScreen(tk.Frame):
                 self.note_text.delete("1.0", "end")
                 self.note_text.insert("1.0", row["notes"])
                 return
-        self.note_text.delete("1.0", "end")
-        messagebox.showinfo("No Notes", "No notes found for this chapter and section.")
-
     def toggle_prompts(self):
         if self.sq3r_enabled.get():
             for label in self.prompt_labels:
@@ -298,43 +380,18 @@ class NotesScreen(tk.Frame):
             for label in self.prompt_labels:
                 label.pack_forget()
 
-
-class ServerSetupScreen(tk.Frame):
+class ServerSetupScreen(ttk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
-        self.controller = controller
+        ttk.Label(self, text="Server Setup Screen").pack(padx=10, pady=10)
+        ttk.Button(self, text="Back", command=lambda: controller.show_frame(MainMenu)).pack(pady=5)
 
-        label = tk.Label(self, text="Server Setup Page", font=("Arial", 16))
-        label.pack(pady=20)
-
-        back_btn = tk.Button(self, text="Back to Menu", command=lambda: controller.show_frame(MainMenu))
-        back_btn.pack(pady=10)
-
-        # Placeholder server setup info
-        instructions = tk.Label(self, text="Instructions or fields for setting up the server will go here.")
-        instructions.pack(pady=10)
-
-
-class AboutScreen(tk.Frame):
+class AboutScreen(ttk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
-        self.controller = controller
+        ttk.Label(self, text="About This App").pack(padx=10, pady=10)
+        ttk.Button(self, text="Back", command=lambda: controller.show_frame(MainMenu)).pack(pady=5)
 
-        label = tk.Label(self, text="About ARA", font=("Arial", 16))
-        label.pack(pady=20)
-
-        description = tk.Label(
-            self,
-            text="ARA helps students actively read using the SQ3R method.\nSurvey, Question, Read, Recite, Review.\n How it works",
-            justify="center"
-        )
-        description.pack(pady=10)
-
-        back_btn = tk.Button(self, text="Back to Menu", command=lambda: controller.show_frame(MainMenu))
-        back_btn.pack(pady=10)
-
-
-# Run the application
 if __name__ == "__main__":
     app = ARA()
     app.mainloop()
