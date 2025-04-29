@@ -3,12 +3,9 @@ from tkinter import messagebox, filedialog
 from tkinter import ttk
 from pdf_manager import PDFManager
 from note_manager import NoteManager
-from tkinter import filedialog, messagebox
-import tkinter as tk
 from PIL import Image, ImageTk
 import fitz  # PyMuPDF library for handling PDFs
-
-## from database_manager import DatabaseManager
+from database_manager import DatabaseManager
 
 # Global colors
 bg_dark = "#1e1e1e"
@@ -143,7 +140,10 @@ class NotesScreen(ttk.Frame):
         super().__init__(parent)
         self.controller = controller
 
+        self.database_manager = DatabaseManager()  # Initialize the database manager
+        self.note_manager = NoteManager(self.database_manager)  # Pass the database manager to NoteManager
         self.pdf_manager = PDFManager()
+
 
         self.button_frame = ttk.Frame(self)
         self.button_frame.grid(row=0, column=0, columnspan=2, sticky="ew")
