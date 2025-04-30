@@ -434,59 +434,13 @@ class ServerSetupScreen(ttk.Frame):
         label = ttk.Label(self, text="Server Setup Page", style="Header.TLabel")
         label.pack(pady=20)
 
-        # Username label and entry
-        username_label = ttk.Label(self, text="Username:")
-        username_label.pack(pady=5)
-        self.username_entry = tk.Entry(self,
-                                       width=30,
-                                       bg=bg_light, 
-                                       fg=fg_light,
-                                       bd=0, 
-                                       relief="flat", 
-                                       highlightthickness=1,
-                                       highlightbackground=bg_light, 
-                                       highlightcolor=accent_color)
-        self.username_entry.pack(pady=5)
-
-        # Password label and entry
-        password_label = ttk.Label(self, text="Password:")
-        password_label.pack(pady=5)
-        self.password_entry = tk.Entry(self, show="*",   # Use 'show="*"' to mask the password
-                                       width=30, 
-                                       bg=bg_light, 
-                                       fg=fg_light,
-                                       bd=0, 
-                                       relief="flat", 
-                                       highlightthickness=1,
-                                       highlightbackground=bg_light,  
-                                       highlightcolor=accent_color)  
-        self.password_entry.pack(pady=5)
-
-        # Submit button
-        submit_btn = ttk.Button(self, text="Submit", command=self.submit_credentials)
-        submit_btn.pack(pady=10)
-
-        #Back to the main menu button
-        back_btn = ttk.Button(self, text="Back to Menu", command=lambda: controller.show_frame(MainMenu))
-        back_btn.pack(pady=10)
-
         # Placeholder server setup info
         instructions = ttk.Label(self, text="Instructions or fields for setting up the server will go here.")
         instructions.pack(pady=10)
 
-    def submit_credentials(self):
-        # Retrieve the username and password entered by the user
-        username = self.username_entry.get()
-        password = self.password_entry.get()
-
-        # Add logic to handle the credentials for saving
-        print(f"Username: {username}, Password: {password}")
-
-            # Example: Show a message box (optional)
-        if username and password:
-            messagebox.showinfo("Success", "Credentials submitted successfully!")
-        else:
-            messagebox.showwarning("Error", "Please enter both username and password.")
+        #Back to the main menu button
+        back_btn = ttk.Button(self, text="Back to Menu", command=lambda: controller.show_frame(MainMenu))
+        back_btn.pack(pady=10)
 
 class AboutScreen(ttk.Frame):
     def __init__(self, parent, controller):
