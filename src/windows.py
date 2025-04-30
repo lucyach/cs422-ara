@@ -166,11 +166,10 @@ class NotesScreen(ttk.Frame):
 
         # Buttons
         ttk.Button(self.button_frame, text="1. Load PDF", command=self.load_pdf, width=15).pack(side="left", padx=5, pady=5)
-        ttk.Button(self.button_frame, text="2. Highlight Sections", command=self.highlight_sections, width=20).pack(side="left", padx=5, pady=5)
-        ttk.Button(self.button_frame, text="3. Create Note Hierarchy", command=self.create_note_hierarchy, width=25).pack(side="left", padx=5, pady=5)
-        ttk.Button(self.button_frame, text="4. Save Notes", command=self.save_notes, width=15).pack(side="left", padx=5, pady=5)
-        ttk.Button(self.button_frame, text="5. Load Notes", command=self.load_notes, width=15).pack(side="left", padx=5, pady=5)
-        ttk.Button(self.button_frame, text="6. Delete All Notes", command=self.delete_all_notes, width=20).pack(side="left", padx=5, pady=5)
+        ttk.Button(self.button_frame, text="2. Create Note Hierarchy", command=self.create_note_hierarchy, width=25).pack(side="left", padx=5, pady=5)
+        ttk.Button(self.button_frame, text="3. Save Notes", command=self.save_notes, width=15).pack(side="left", padx=5, pady=5)
+        ttk.Button(self.button_frame, text="4. Load Notes", command=self.load_notes, width=15).pack(side="left", padx=5, pady=5)
+        ttk.Button(self.button_frame, text="5. Delete All Notes", command=self.delete_all_notes, width=20).pack(side="left", padx=5, pady=5)
 
         # SQ3R checkbox prompts
         self.sq3r_enabled = tk.BooleanVar(value=True)
@@ -426,20 +425,6 @@ class NotesScreen(ttk.Frame):
         else:
             for checkbox in self.sq3r_checkboxes:
                 checkbox.pack_forget()
-
-    def highlight_sections(self):
-        from tkinter import simpledialog, messagebox
-        keywords = simpledialog.askstring("Highlight Sections", "Enter keywords (comma-separated):")
-        if keywords:
-            highlighted = self.pdf_manager.highlight_sections(keywords.split(","))
-            if highlighted:
-                self.pdf_display.config(state="normal")
-                self.pdf_display.delete("1.0", "end")
-                self.pdf_display.insert("1.0", "\n".join(highlighted))
-                self.pdf_display.config(state="disabled")
-                messagebox.showinfo("Highlighted Sections", "Highlighted sections displayed.")
-            else:
-                messagebox.showinfo("Highlighted Sections", "No matches found.")
 
 class ServerSetupScreen(ttk.Frame):
     def __init__(self, parent, controller):
