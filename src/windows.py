@@ -25,7 +25,7 @@ class ARA(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("ARA - Active Reading Assistant")
-        self.geometry("1100x700")
+        self.geometry("1100x800")
 
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
@@ -114,12 +114,15 @@ class MainMenu(ttk.Frame):
         super().__init__(parent)
         self.controller = controller
 
+        # Make the MainMenu frame expand
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
 
+        # Create a container frame that will hold the content
         container = ttk.Frame(self)
         container.grid(row=0, column=0, sticky="nsew")
 
+        # Center container content using another grid
         container.grid_rowconfigure(0, weight=1)
         container.grid_rowconfigure(2, weight=1)
         container.grid_columnconfigure(0, weight=1)
@@ -144,7 +147,7 @@ class NotesScreen(ttk.Frame):
         self.note_manager = NoteManager(self.database_manager)  # Pass the database manager to NoteManager
         self.pdf_manager = PDFManager()
 
-
+        # Layout frames for buttons, notes, and PDF viewer
         self.button_frame = ttk.Frame(self)
         self.button_frame.grid(row=0, column=0, columnspan=2, sticky="ew")
 
@@ -163,17 +166,21 @@ class NotesScreen(ttk.Frame):
 
         # Buttons
         ttk.Button(self.button_frame, text="1. Load PDF", command=self.load_pdf, width=15).pack(side="left", padx=5, pady=5)
-        ttk.Button(self.button_frame, text="2. Create Note Hierarchy", command=self.create_note_hierarchy, width=25).pack(side="left", padx=5, pady=5)
-        ttk.Button(self.button_frame, text="3. Save Notes", command=self.save_notes, width=15).pack(side="left", padx=5, pady=5)
-        ttk.Button(self.button_frame, text="4. Load Notes", command=self.load_notes, width=15).pack(side="left", padx=5, pady=5)
-        ttk.Button(self.button_frame, text="5. Delete All Notes", command=self.delete_all_notes, width=20).pack(side="left", padx=5, pady=5)
+        ttk.Button(self.button_frame, text="2. Highlight Sections", command=self.highlight_sections, width=20).pack(side="left", padx=5, pady=5)
+        ttk.Button(self.button_frame, text="3. Create Note Hierarchy", command=self.create_note_hierarchy, width=25).pack(side="left", padx=5, pady=5)
+        ttk.Button(self.button_frame, text="4. Save Notes", command=self.save_notes, width=15).pack(side="left", padx=5, pady=5)
+        ttk.Button(self.button_frame, text="5. Load Notes", command=self.load_notes, width=15).pack(side="left", padx=5, pady=5)
+        ttk.Button(self.button_frame, text="6. Delete All Notes", command=self.delete_all_notes, width=20).pack(side="left", padx=5, pady=5)
 
+        # SQ3R checkbox prompts
         self.sq3r_enabled = tk.BooleanVar(value=True)
         self.prompt_toggle = ttk.Checkbutton(self.button_frame, text="SQ3R Prompts", variable=self.sq3r_enabled, command=self.toggle_prompts)
         self.prompt_toggle.pack(side="left", padx=5, pady=5)
 
+        # Notes section
         ttk.Label(self.note_frame, text="Notes", style="Header.TLabel").pack(pady=5)
 
+        # tk.Entry is used to create a text entry field
         chapter_frame = ttk.Frame(self.note_frame)
         chapter_frame.pack(pady=5, padx=10, fill="x")
         ttk.Label(chapter_frame, text="Chapter:").pack(side="left", padx=5)
@@ -224,7 +231,7 @@ class NotesScreen(ttk.Frame):
                                 highlightthickness=1, 
                                 highlightbackground=bg_light, 
                                 highlightcolor=accent_color)
-        self.canvas.pack(side="top", fill="x", expand=False)  # Adjust to fit horizontally but not vertically
+        self.canvas.pack(side="top", fill="both", expand=True)
 
         # Add these attributes to track the current page and total pages
         self.current_page = 0  # Track the current page
@@ -241,21 +248,30 @@ class NotesScreen(ttk.Frame):
         self.next_button = ttk.Button(nav_frame, text="Next", command=self.show_next_page, state="disabled")
         self.next_button.pack(side="right", padx=10, pady=5)  # Align to the right
 
-        # SQ3R prompts
-        self.prompt_labels = [
-            ttk.Label(self.note_frame, text="SURVEY: Glance over the headings to get the big ideas."),
-            ttk.Label(self.note_frame, text="QUESTION: What questions do you want to answer?"),
-            ttk.Label(self.note_frame, text="READ: Read to find answers and main points."),
-            ttk.Label(self.note_frame, text="RECITE: Write down what you remember."),
-            ttk.Label(self.note_frame, text="REVIEW: Summarize key ideas and test yourself."),
+        # SQ3R checkbox prompts instead of just labels 
+        self.sq3r_check_vars = []
+        self.sq3r_checkboxes = []
+
+        sq3r_texts = [
+            "SURVEY: Glance over the headings to get the big ideas.",
+            "QUESTION: What questions do you want to answer?",
+            "READ: Read to find answers and main points.",
+            "RECITE: Write down what you remember.",
+            "REVIEW: Summarize key ideas and test yourself."
         ]
 
-        for label in self.prompt_labels:
-            label.pack(anchor="w", padx=10)
+        for text in sq3r_texts:
+            var = tk.BooleanVar()
+            checkbox = ttk.Checkbutton(self.note_frame, text=text, variable=var)
+            checkbox.pack(anchor="w", padx=10)
+            self.sq3r_check_vars.append(var)
+            self.sq3r_checkboxes.append(checkbox)
 
+        # Back to the main menu button
         back_btn = ttk.Button(self, text="Back to Main Menu", width=20, command=lambda: controller.show_frame(MainMenu))
         back_btn.grid(row=2, column=0, columnspan=2, pady=10)
 
+    # Methods from MainWindow class
     def load_pdf(self):
         """Load a PDF file and display its first page in the PDF viewer."""
         file_path = filedialog.askopenfilename(
@@ -282,30 +298,50 @@ class NotesScreen(ttk.Frame):
                     self.next_button.config(state="disabled")
                 self.prev_button.config(state="disabled")
             except Exception as e:
-                ttk.messagebox.showerror("Error", f"Failed to load PDF: {e}")
-        
+                messagebox.showerror("Error", f"Failed to load PDF: {e}")
+            
     def display_page(self, page_number):
-        """Display a specific page of the PDF in the canvas."""
+        """Display a specific page of the PDF and make it responsive to window resizing."""
         try:
-            # Render the page as an image
-            img = self.pdf_manager.render_page_as_image(self.file_path, page_number, dpi=100)
+            self.current_page = page_number
 
-            # Resize the image to fit the canvas dimensions
-            self.update_idletasks()  # Ensure the canvas dimensions are updated
+            # Render the raw image for the current page
+            raw_image = self.pdf_manager.render_page_as_image(self.file_path, page_number, dpi=100)
+
+            # Bind to canvas resizing — trigger redisplay on window resize
+            if not hasattr(self, "resize_bound"):
+                self.canvas.bind("<Configure>", lambda event: self.display_page(self.current_page))
+                self.resize_bound = True
+
+            # Get current canvas size
+            self.update_idletasks()  # Ensure dimensions are up-to-date
             canvas_width = self.canvas.winfo_width()
             canvas_height = self.canvas.winfo_height()
-            img = img.resize((canvas_width, canvas_height), Image.Resampling.LANCZOS)
 
-            # Convert the PIL image to a format compatible with Tkinter
-            self.tk_image = ImageTk.PhotoImage(img)
+            # Calculate scaled size with aspect ratio preserved
+            img_ratio = raw_image.width / raw_image.height
+            canvas_ratio = canvas_width / canvas_height
 
-            # Display the image on the canvas
+            if img_ratio > canvas_ratio:
+                new_width = canvas_width
+                new_height = int(canvas_width / img_ratio)
+            else:
+                new_height = canvas_height
+                new_width = int(canvas_height * img_ratio)
+
+            resized_image = raw_image.resize((new_width, new_height), Image.Resampling.LANCZOS)
+
+            # Convert and display
+            self.tk_image = ImageTk.PhotoImage(resized_image)
             self.canvas.delete("all")
-            self.canvas.create_image(0, 0, anchor="nw", image=self.tk_image)
+            x = (self.canvas.winfo_width() - new_width) // 2
+            y = (self.canvas.winfo_height() - new_height) // 2
+            self.canvas.create_image(x, y, anchor="nw", image=self.tk_image)
             self.canvas.config(scrollregion=self.canvas.bbox("all"))
+
         except Exception as e:
-            ttk.messagebox.showerror("Error", f"Failed to display page: {e}")
-    
+            messagebox.showerror("Error", f"Failed to display page: {e}")
+
     def show_next_page(self):
         """Display the next page of the PDF."""
         if self.current_page < self.total_pages - 1:
@@ -372,13 +408,30 @@ class NotesScreen(ttk.Frame):
                 self.note_text.delete("1.0", "end")
                 self.note_text.insert("1.0", row["notes"])
                 return
+        self.note_text.delete("1.0", "end")
+        messagebox.showinfo("No Notes", "No notes found for this chapter and section.")
+
     def toggle_prompts(self):
         if self.sq3r_enabled.get():
-            for label in self.prompt_labels:
-                label.pack(anchor="w", padx=10)
+            for checkbox in self.sq3r_checkboxes:
+                checkbox.pack(anchor="w", padx=10)
         else:
-            for label in self.prompt_labels:
-                label.pack_forget()
+            for checkbox in self.sq3r_checkboxes:
+                checkbox.pack_forget()
+
+    def highlight_sections(self):
+        from tkinter import simpledialog, messagebox
+        keywords = simpledialog.askstring("Highlight Sections", "Enter keywords (comma-separated):")
+        if keywords:
+            highlighted = self.pdf_manager.highlight_sections(keywords.split(","))
+            if highlighted:
+                self.pdf_display.config(state="normal")
+                self.pdf_display.delete("1.0", "end")
+                self.pdf_display.insert("1.0", "\n".join(highlighted))
+                self.pdf_display.config(state="disabled")
+                messagebox.showinfo("Highlighted Sections", "Highlighted sections displayed.")
+            else:
+                messagebox.showinfo("Highlighted Sections", "No matches found.")
 
 class ServerSetupScreen(ttk.Frame):
     def __init__(self, parent, controller):
