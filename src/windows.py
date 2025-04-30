@@ -185,9 +185,11 @@ class NotesScreen(ttk.Frame):
         chapter_frame.pack(pady=5, padx=10, fill="x")
         ttk.Label(chapter_frame, text="Chapter:").pack(side="left", padx=5)
         self.chapter_entry = tk.Entry(chapter_frame, 
-                                      width=30, bg=bg_light, 
+                                      width=30, 
+                                      bg=bg_light, 
                                       fg=fg_light,
-                                      bd=0, relief="flat", 
+                                      bd=0, 
+                                      relief="flat", 
                                       highlightthickness=1,
                                       highlightbackground=bg_light, 
                                       highlightcolor=accent_color)
@@ -198,10 +200,14 @@ class NotesScreen(ttk.Frame):
         section_frame.pack(pady=5, padx=10, fill="x")
         ttk.Label(section_frame, text="Section:").pack(side="left", padx=5)
         self.section_entry = tk.Entry(section_frame, 
-                                      width=30, bg=bg_light, 
+                                      width=30, 
+                                      bg=bg_light, 
                                       fg=fg_light,
-                                      bd=0, relief="flat", highlightthickness=1,
-                                      highlightbackground=bg_light, highlightcolor=accent_color)
+                                      bd=0, 
+                                      relief="flat", 
+                                      highlightthickness=1,
+                                      highlightbackground=bg_light, 
+                                      highlightcolor=accent_color)
         self.section_entry.pack(side="left", padx=5, pady=1)
 
         # Button to load notes for the selected section
@@ -211,8 +217,10 @@ class NotesScreen(ttk.Frame):
         self.note_text = tk.Text(self.note_frame, 
                                  wrap="word", 
                                  bg=bg_light, 
-                                 fg=fg_light, bd=0, 
-                                 relief="flat", highlightthickness=1, 
+                                 fg=fg_light, 
+                                 bd=0, 
+                                 relief="flat", 
+                                 highlightthickness=1, 
                                  highlightbackground=bg_light,
                                  highlightcolor=accent_color, 
                                  height=20)
@@ -436,14 +444,82 @@ class NotesScreen(ttk.Frame):
 class ServerSetupScreen(ttk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
-        ttk.Label(self, text="Server Setup Screen").pack(padx=10, pady=10)
-        ttk.Button(self, text="Back", command=lambda: controller.show_frame(MainMenu)).pack(pady=5)
+        self.controller = controller
+
+        label = ttk.Label(self, text="Server Setup Page", style="Header.TLabel")
+        label.pack(pady=20)
+
+        # Username label and entry
+        username_label = ttk.Label(self, text="Username:")
+        username_label.pack(pady=5)
+        self.username_entry = tk.Entry(self,
+                                       width=30,
+                                       bg=bg_light, 
+                                       fg=fg_light,
+                                       bd=0, 
+                                       relief="flat", 
+                                       highlightthickness=1,
+                                       highlightbackground=bg_light, 
+                                       highlightcolor=accent_color)
+        self.username_entry.pack(pady=5)
+
+        # Password label and entry
+        password_label = ttk.Label(self, text="Password:")
+        password_label.pack(pady=5)
+        self.password_entry = tk.Entry(self, show="*",   # Use 'show="*"' to mask the password
+                                       width=30, 
+                                       bg=bg_light, 
+                                       fg=fg_light,
+                                       bd=0, 
+                                       relief="flat", 
+                                       highlightthickness=1,
+                                       highlightbackground=bg_light,  
+                                       highlightcolor=accent_color)  
+        self.password_entry.pack(pady=5)
+
+        # Submit button
+        submit_btn = ttk.Button(self, text="Submit", command=self.submit_credentials)
+        submit_btn.pack(pady=10)
+
+        #Back to the main menu button
+        back_btn = ttk.Button(self, text="Back to Menu", command=lambda: controller.show_frame(MainMenu))
+        back_btn.pack(pady=10)
+
+        # Placeholder server setup info
+        instructions = ttk.Label(self, text="Instructions or fields for setting up the server will go here.")
+        instructions.pack(pady=10)
+
+    def submit_credentials(self):
+        # Retrieve the username and password entered by the user
+        username = self.username_entry.get()
+        password = self.password_entry.get()
+
+        # Add logic to handle the credentials for saving
+        print(f"Username: {username}, Password: {password}")
+
+            # Example: Show a message box (optional)
+        if username and password:
+            messagebox.showinfo("Success", "Credentials submitted successfully!")
+        else:
+            messagebox.showwarning("Error", "Please enter both username and password.")
 
 class AboutScreen(ttk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
-        ttk.Label(self, text="About This App").pack(padx=10, pady=10)
-        ttk.Button(self, text="Back", command=lambda: controller.show_frame(MainMenu)).pack(pady=5)
+        self.controller = controller
+
+        label = ttk.Label(self, text="About ARA", style="Header.TLabel")
+        label.pack(pady=20)
+
+        description = ttk.Label(
+            self,
+            text="ARA helps students actively read using the SQ3R method.\nSurvey, Question, Read, Recite, Review.\n How it works",
+            justify="center",
+        )
+        description.pack(pady=10)
+
+        back_btn = ttk.Button(self, text="Back to Menu", command=lambda: controller.show_frame(MainMenu))
+        back_btn.pack(pady=10)
 
 if __name__ == "__main__":
     app = ARA()
