@@ -426,20 +426,6 @@ class NotesScreen(ttk.Frame):
             for checkbox in self.sq3r_checkboxes:
                 checkbox.pack_forget()
 
-    def highlight_sections(self):
-        from tkinter import simpledialog, messagebox
-        keywords = simpledialog.askstring("Highlight Sections", "Enter keywords (comma-separated):")
-        if keywords:
-            highlighted = self.pdf_manager.highlight_sections(keywords.split(","))
-            if highlighted:
-                self.pdf_display.config(state="normal")
-                self.pdf_display.delete("1.0", "end")
-                self.pdf_display.insert("1.0", "\n".join(highlighted))
-                self.pdf_display.config(state="disabled")
-                messagebox.showinfo("Highlighted Sections", "Highlighted sections displayed.")
-            else:
-                messagebox.showinfo("Highlighted Sections", "No matches found.")
-
 class ServerSetupScreen(ttk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
