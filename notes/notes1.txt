@@ -1,1 +1,0 @@
-PDFManager has no Attribute "highlight_sections
