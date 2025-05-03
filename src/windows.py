@@ -17,8 +17,8 @@ accent_color = "#98ff98"
 
 # Global fonts
 title_font = "Segoe UI", 25, "bold"
-header_font = "Segoe UI", 14, "bold"
-text_font = "Segoe UI", 10
+header_font = "Segoe UI", 15, "bold"
+text_font = "Segoe UI", 13
 
 
 class ARA(tk.Tk):
@@ -436,29 +436,51 @@ class ServerSetupScreen(ttk.Frame):
 
         # Placeholder server setup info
         instructions = ttk.Label(self, text="Instructions or fields for setting up the server will go here.")
-        instructions.pack(pady=10)
+        instructions.pack(pady=20)
 
         #Back to the main menu button
         back_btn = ttk.Button(self, text="Back to Menu", command=lambda: controller.show_frame(MainMenu))
-        back_btn.pack(pady=10)
+        back_btn.pack(pady=20)
 
 class AboutScreen(ttk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
 
-        label = ttk.Label(self, text="About ARA", style="Header.TLabel")
-        label.pack(pady=20)
+        # Page title
+        title = ttk.Label(self, text="About ARA", style="Title.TLabel")
+        title.pack(pady=20)
 
-        description = ttk.Label(
-            self,
-            text="ARA helps students actively read using the SQ3R method.\nSurvey, Question, Read, Recite, Review.\n How it works",
-            justify="center",
+
+        section1_text = (
+            "ARA (Active Reading Assistant) is a reading and note-taking tool built around the SQ3R method:\n"
+            "Survey, Question, Read, Recite, and Review.\n\n"
+            "It is designed to help people engage deeply with academic texts, organize their ideas, and\n"
+            "retain key information. ARA integrates PDF viewing, guided prompts, and structured note entry\n"
+            "into one easy to use interface."
         )
-        description.pack(pady=10)
+        section1_label = ttk.Label(self, text=section1_text, style="Body.TLabel")
+        section1_label.pack(padx=20, pady=10)
 
+        #How it Works 
+        section2_title = ttk.Label(self, text="How It Works", style="Header.TLabel", justify="center")
+        section2_title.pack(pady=(20, 0))
+
+        section2_text = (
+            "1. Load a PDF: Start by uploading a reading or class material.\n"
+            "2. Take Notes: Use the note-taking area to capture insights by chapter and section.\n"
+            "3. Use Prompts: Enable SQ3R checkboxes to guide your reading and reflection process.\n"
+            "4. Save & Review: Your notes are saved locally and can be revisited at any time.\n\n"
+            "By combining reading with active reflection, ARA helps you process material more effectively\n"
+            "and develop stronger study habits."
+        )
+        section2_label = ttk.Label(self, text=section2_text, style="Body.TLabel")
+        section2_label.pack(padx=20, pady=10)
+
+        # Back button
         back_btn = ttk.Button(self, text="Back to Menu", command=lambda: controller.show_frame(MainMenu))
-        back_btn.pack(pady=10)
+        back_btn.pack(pady=20)
+
 
 if __name__ == "__main__":
     app = ARA()
