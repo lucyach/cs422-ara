@@ -497,8 +497,12 @@ class ServerSetupScreen(ttk.Frame):
         label.pack(pady=20)
 
         # Placeholder server setup info
-        instructions = ttk.Label(self, text="Instructions or fields for setting up the server will go here.")
+        instructions = ttk.Label(self, text="Select a user to connect:")
         instructions.pack(pady=10)
+
+        self.user_selector = ttk.Combobox(self, values=["User1", "User2", "User3"], state="readonly", width=30, style="CustomCombobox.TCombobox")
+        self.user_selector.set("Choose a User")
+        self.user_selector.pack(pady=10)
 
         #Back to the main menu button
         back_btn = ttk.Button(self, text="Back to Menu", command=lambda: controller.show_frame(MainMenu))
