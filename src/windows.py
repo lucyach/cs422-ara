@@ -25,7 +25,7 @@ class ARA(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("ARA - Active Reading Assistant")
-        self.geometry("1100x800")
+        self.geometry("1200x800")
 
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
@@ -108,6 +108,21 @@ class ARA(tk.Tk):
         style.map("TCheckbutton",
                   background=[("active", accent_color)],
                   foreground=[("active", fg_dark)])
+        
+        style.configure("CustomCombobox.TCombobox",
+            fieldbackground=bg_light,
+            background=bg_medium,
+            foreground=fg_light,
+            arrowcolor=fg_light,
+            relief="flat",
+            borderwidth=1)
+
+        style.map("CustomCombobox.TCombobox",
+            fieldbackground=[("readonly", bg_light)],
+            foreground=[("readonly", fg_light)],
+            arrowcolor=[("active", fg_dark)],
+            background=[("active", accent_color)],
+            bordercolor=[("focus", accent_color)])
 
 class MainMenu(ttk.Frame):
     def __init__(self, parent, controller):
@@ -254,6 +269,28 @@ class NotesScreen(ttk.Frame):
 
         self.next_button = ttk.Button(nav_frame, text="Next", command=self.show_next_page, state="disabled")
         self.next_button.pack(side="right", padx=10, pady=5)  # Align to the right
+
+        # Preloaded PDFs
+        ttk.Label(self.button_frame, text="Preloaded PDFs:").pack(side="left", padx=(10, 0), pady=5)
+
+        self.preloaded_pdfs = {
+            "Sommerville - Chapter 1": "pdfs/SE_10e_Sommerville_Ch1.pdf",
+            "Sommerville - Chapter 2": "pdfs/SE_10e_Sommerville_Ch2.pdf",
+            "Sommerville - Chapter 22": "pdfs/SE_10e_Sommerville_Ch22.pdf"
+        }
+
+        self.pdf_selector = ttk.Combobox(
+            self.button_frame,
+            values=list(self.preloaded_pdfs.keys()),
+            state="readonly",
+            width=30,
+            style="CustomCombobox.TCombobox"
+        )
+
+        self.pdf_selector.set("Select a PDF")
+        self.pdf_selector.pack(side="left", padx=5, pady=5)
+
+        self.pdf_selector.bind("<<ComboboxSelected>>", self.on_preloaded_pdf_selected)
 
         # SQ3R checkbox prompts instead of just labels 
         self.sq3r_check_vars = []
@@ -419,12 +456,31 @@ class NotesScreen(ttk.Frame):
         messagebox.showinfo("No Notes", "No notes found for this chapter and section.")
 
     def toggle_prompts(self):
+    
         if self.sq3r_enabled.get():
             for checkbox in self.sq3r_checkboxes:
                 checkbox.pack(anchor="w", padx=10)
         else:
             for checkbox in self.sq3r_checkboxes:
                 checkbox.pack_forget()
+    
+    def on_preloaded_pdf_selected(self, event):
+        selected = self.pdf_selector.get()
+        self.pdf_selector.selection_clear()
+        
+        if selected in self.preloaded_pdfs:
+            self.file_path = self.preloaded_pdfs[selected]
+            try:
+                with fitz.open(self.file_path) as pdf:
+                    self.total_pages = len(pdf)
+
+                self.current_page = 0
+                self.display_page(self.current_page)
+
+                self.next_button.config(state="normal" if self.total_pages > 1 else "disabled")
+                self.prev_button.config(state="disabled")
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to load PDF: {e}")
 
 class ServerSetupScreen(ttk.Frame):
     def __init__(self, parent, controller):
