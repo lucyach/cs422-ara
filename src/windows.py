@@ -323,25 +323,21 @@ class NotesScreen(ttk.Frame):
 
     # Methods from MainWindow class
     def load_pdf(self):
-        """Load a PDF file and display its first page in the PDF viewer."""
         file_path = filedialog.askopenfilename(
             title="Select PDF File",
             filetypes=[("PDF Files", "*.pdf")]
         )
         if file_path:
             try:
-                # Open the PDF and get the total number of pages
                 with fitz.open(file_path) as pdf:
                     self.total_pages = len(pdf)
 
-                # Reset to the first page
                 self.current_page = 0
                 self.file_path = file_path
 
-                # Display the first page
                 self.display_page(self.current_page)
+                self.load_notes_for_section()  # Automatically load notes for the PDF
 
-                # Enable navigation buttons if there are multiple pages
                 if self.total_pages > 1:
                     self.next_button.config(state="normal")
                 else:
@@ -422,10 +418,17 @@ class NotesScreen(ttk.Frame):
         chapter = self.chapter_entry.get().strip()
         section = self.section_entry.get().strip()
         notes = self.note_text.get("1.0", "end").strip()
+
         if not chapter or not section or not notes:
             messagebox.showwarning("Warning", "All fields must be filled out to save notes.")
             return
+
+        # Save notes with chapter/section and also associate with the open PDF
         self.note_manager.create_note_hierarchy(chapter, section, notes)
+
+        if self.file_path:
+            self.note_manager.create_note_hierarchy(self.file_path, "General", notes)
+
         messagebox.showinfo("Success", "Notes saved successfully.")
 
     def load_notes(self):
@@ -443,21 +446,42 @@ class NotesScreen(ttk.Frame):
     def delete_all_notes(self):
         if messagebox.askyesno("Delete All Notes", "Are you sure you want to delete all notes?"):
             self.note_manager.delete_all_notes()
+
+            # Also delete notes associated with the open PDF
+            if self.file_path:
+                self.note_manager.delete_notes_for_pdf(self.file_path)
+
             self.note_text.delete("1.0", "end")
             messagebox.showinfo("Success", "All notes deleted.")
+    
+    def delete_notes_for_pdf(self, file_path):
+        self.database_manager.delete_notes_by_chapter(file_path)
 
     def load_notes_for_section(self):
         chapter = self.chapter_entry.get().strip()
         section = self.section_entry.get().strip()
+
         if not chapter or not section:
             messagebox.showwarning("Warning", "Chapter and section must be filled.")
             return
+
+        # Try to load notes associated with the open PDF
+        if self.file_path:
+            notes = self.note_manager.load_notes()
+            for row in notes:
+                if row["chapter_title"] == self.file_path:  # Match file path
+                    self.note_text.delete("1.0", "end")
+                    self.note_text.insert("1.0", row["notes"])
+                    return
+
+        # Fall back to loading notes by chapter and section
         notes = self.note_manager.load_notes()
         for row in notes:
             if row["chapter_title"] == chapter and row["section_heading"] == section:
                 self.note_text.delete("1.0", "end")
                 self.note_text.insert("1.0", row["notes"])
                 return
+
         self.note_text.delete("1.0", "end")
         messagebox.showinfo("No Notes", "No notes found for this chapter and section.")
 
@@ -473,7 +497,7 @@ class NotesScreen(ttk.Frame):
     def on_preloaded_pdf_selected(self, event):
         selected = self.pdf_selector.get()
         self.pdf_selector.selection_clear()
-        
+
         if selected in self.preloaded_pdfs:
             self.file_path = self.preloaded_pdfs[selected]
             try:
@@ -482,6 +506,7 @@ class NotesScreen(ttk.Frame):
 
                 self.current_page = 0
                 self.display_page(self.current_page)
+                self.load_notes_for_section()  # Automatically load notes for the PDF
 
                 self.next_button.config(state="normal" if self.total_pages > 1 else "disabled")
                 self.prev_button.config(state="disabled")
