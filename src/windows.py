@@ -317,6 +317,12 @@ class NotesScreen(ttk.Frame):
         back_btn = ttk.Button(self, text="Back to Main Menu", width=20, command=lambda: controller.show_frame(MainMenu))
         back_btn.grid(row=2, column=0, columnspan=2, pady=10)
 
+        # Bind the <<FocusOut>> event to the chapter and section entry fields
+        self.chapter_entry.bind("<Return>", lambda event: self.load_notes_for_section())
+        self.section_entry.bind("<Return>", lambda event: self.load_notes_for_section())
+
+
+
     # Methods from MainWindow class
     def load_pdf(self):
         file_path = filedialog.askopenfilename(
@@ -447,23 +453,15 @@ class NotesScreen(ttk.Frame):
             messagebox.showinfo("Success", "All notes deleted.")
 
     def load_notes_for_section(self):
+        """Load notes for the specified chapter and section, or clear the note-taking box if none are found."""
         chapter = self.chapter_entry.get().strip()
         section = self.section_entry.get().strip()
 
         if not chapter or not section:
-            messagebox.showwarning("Warning", "Chapter and section must be filled.")
+            self.note_text.delete("1.0", "end")
             return
 
-        # Try to load notes associated with the open PDF
-        if self.file_path:
-            notes = self.note_manager.load_notes()
-            for row in notes:
-                if row["chapter_title"] == self.file_path:  # Match file path
-                    self.note_text.delete("1.0", "end")
-                    self.note_text.insert("1.0", row["notes"])
-                    return
-
-        # Fall back to loading notes by chapter and section
+        # Try to load notes by chapter and section
         notes = self.note_manager.load_notes()
         for row in notes:
             if row["chapter_title"] == chapter and row["section_heading"] == section:
@@ -471,8 +469,8 @@ class NotesScreen(ttk.Frame):
                 self.note_text.insert("1.0", row["notes"])
                 return
 
+        # Clear the note-taking box if no notes are found
         self.note_text.delete("1.0", "end")
-        messagebox.showinfo("No Notes", "No notes found for this chapter and section.")
 
     def toggle_prompts(self):
     
