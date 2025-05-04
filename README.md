@@ -10,7 +10,7 @@ ara
 │   ├── main.py               # Entry point of the application
 │   ├── pdf_manager.py        # Handles PDF operations
 │   ├── note_manager.py       # Manages hierarchical notes
-│   ├── server.py             # Sets up the command-line interface
+│   ├── windows.py             # Handles the entire display window
 │   └── database_manager.py    # Manages database operations
 ├── requirements.txt          # Lists project dependencies
 └── README.md                 # Documentation for the project
@@ -31,7 +31,7 @@ ara
 ## Usage
 To run the application, execute the following command in your terminal:
 ```
-python src/main.py
+python src/windows.py
 ```
 
 Note: You may have to use python3 and pip3 if using the latest python version.
