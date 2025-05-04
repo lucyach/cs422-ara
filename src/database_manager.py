@@ -3,11 +3,18 @@ DatabaseManager class for managing database operations.
 This class provides methods to save and load data from the database.
 '''
 
-# from sqlalchemy import create_engine, text  # Import text for raw SQL queries
-# from sqlalchemy.orm import sessionmaker
-
 import random, json, os, string
 from pymongo.mongo_client import MongoClient
+from datetime import datetime
+
+'''
+CLASS DEFINITIONS
+
+User: Local data about the client
+
+Database: Database class
+
+'''
 
 class User:
     def __init__(self):
@@ -18,8 +25,10 @@ class User:
             "server_connection" : False,
             "disable_prompts" : False,
             "offline_mode" : False,
-            "tutorial_complete" : False
+            "tutorial_complete" : False,
+            "login": "None"
         }
+
 
     def FirstTimeSetup(self):
         '''
@@ -43,8 +52,11 @@ class User:
 
         print(f"User ID: {new_user_id}")
 
-    def SaveUserJSON(self, filename):
-        pass
+    def SaveUserJSON(self, filename = "userdata"):
+            with open(filename, 'r') as file:
+                self.user_data = json.load(file)
+                #print(self.user_data)
+                return True
 
     def LoadUserJSON(self, filename = "userdata"):
         '''
@@ -56,68 +68,60 @@ class User:
         try:
             with open(filename, 'r') as file:
                 self.user_data = json.load(file)
-                print(self.user_data)
-                return True
-                
-                
+                #print(self.user_data)
+                return True     
         except FileNotFoundError:
-            print("ERROR NO JSON FILE FOUND")
+            #print("ERROR NO JSON FILE FOUND")
             self.FirstTimeSetup()
 
 class DatabaseManager:
-    def __init__(self):
-        pass
+    def __init__(self, db_username="ARAUser1", db_password="CREDENTIALS", db_name="Notes"):
+        self.db_name = db_name
+        self.connect(db_username, db_password)
 
-    def _initialize_database(self):
-        pass
+    def connect(self, db_username, db_password):
+        uri = f"mongodb+srv://{db_username}:{db_password}@araproject.iepyikz.mongodb.net/?retryWrites=true&w=majority&appName=ARAProject"
 
-    def save_data(self, query, params):
-        pass
+        try:
+            self.client = MongoClient(uri, serverSelectionTimeoutMS=7000)
+            self.client.admin.command('ping')
+            print(f"Successfully connected as {db_username}")
+            self.db = self.client[self.db_name]
+        except Exception as e:
+            print(f"Failed to connect to database as {db_username}: {e}")
+            self.client = None
+            self.db = None
 
-    def load_data(self, query, params):
-        pass
+    def change_client(self, new_user:string, new_cred:string):
+        print(f"Switching to {new_user}")
+        self.connect(new_user, new_cred)
 
 
+    def save_data(self, collection_name, data):
+        if not self.db:
+            print("No database connection.")
+            return None
 
-# class DatabaseManager:
-#     def __init__(self):
-#         self.engine = create_engine('sqlite:///ara.db')  # SQLite database
-#         self.Session = sessionmaker(bind=self.engine)
-#         self._initialize_database()
+        try:
+            result = self.db[collection_name].insert_one(data)
+            print(f"Data inserted into '{collection_name}' with _id: {result.inserted_id}")
+            return result.inserted_id
+        except Exception as e:
+            print(f"Failed to insert data: {e}")
+            return None
 
-#     def _initialize_database(self):  # Initialize the database
-#         """Initialize the database with the required tables."""
-#         with self.engine.connect() as connection:
-#             connection.execute(text("""
-#                 CREATE TABLE IF NOT EXISTS notes (
-#                     id INTEGER PRIMARY KEY AUTOINCREMENT,
-#                     content TEXT NOT NULL
-#                 )
-#             """))
+    def load_data(self, collection_name, query={}):
+        if not self.db:
+            print("No database connection.")
+            return None
 
-#     def save_data(self, query, params):
-#         """Save data to the database."""
-#         session = self.Session()
-#         try:
-#             session.execute(text(query), params)  # Ensure params is a dictionary
-#             session.commit()  # Commit the transaction
-#             print("Data saved successfully.")
-#         except Exception as e:
-#             session.rollback()  # Rollback in case of an error
-#             print(f"Error saving data: {e}")
-#         finally:
-#             session.close()  # Ensure the session is closed
+        try:
+            collection = self.db[collection_name]
+            result = collection.find_one(query)
+            print(f"Loaded '{collection_name}': {result}")
+            return result
+        
+        except Exception as e:
+            print(f"Failed to load data: {e}")
+            return None
 
-#     def load_data(self, query, params=None):
-#         """Load data from the database."""
-#         session = self.Session()
-#         try:
-#             if params is None:
-#                 params = {}
-#             result = session.execute(text(query), params)  # Pass params for parameterized queries
-#             return [dict(row._mapping) for row in result]  # Use _mapping for dictionary-like access
-#         except Exception as e:
-#             print(f"Error loading data: {e}")
-#             return []
-#         finally:
-#             session.close()  # Ensure the session is closed
