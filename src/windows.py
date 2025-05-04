@@ -425,12 +425,11 @@ class NotesScreen(ttk.Frame):
             messagebox.showwarning("Warning", "All fields must be filled out to save notes.")
             return
 
-        # Save notes with chapter/section
-        self.note_manager.create_note_hierarchy(chapter, section, notes)
+        # Save only the raw values
+        formatted_notes = f"{self.file_path or 'N/A'}\n{notes}"
 
-        # Optionally associate notes with the open PDF
-        if self.file_path:
-            self.note_manager.create_note_hierarchy(self.file_path, "General", notes)
+        # Save the notes under the respective chapter and section
+        self.note_manager.create_note_hierarchy(chapter, section, formatted_notes)
 
         messagebox.showinfo("Success", "Notes saved successfully.")
 
@@ -438,7 +437,11 @@ class NotesScreen(ttk.Frame):
         notes = self.note_manager.load_notes()
         if notes:
             display = "\n\n".join(
-                f"Chapter: {n['chapter_title']}\nSection: {n['section_heading']}\nNotes: {n['notes']}" for n in notes
+                f"PDF: {n['notes'].splitlines()[0]}\n"
+                f"Chapter: {n['chapter_title']}\n"
+                f"Section: {n['section_heading']}\n"
+                f"Notes: {' '.join(n['notes'].splitlines()[1:])}"
+                for n in notes
             )
             self.note_text.delete("1.0", "end")
             self.note_text.insert("1.0", display)
