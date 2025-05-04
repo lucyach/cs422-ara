@@ -230,10 +230,6 @@ class NotesScreen(ttk.Frame):
                                       highlightcolor=accent_color)
         self.section_entry.pack(side="left", padx=5, pady=1)
 
-        # Button to load notes for the selected section
-        self.load_notes_button = ttk.Button(self.note_frame, text="Begin Notetaking", command=self.load_notes_for_section, width=20)
-        self.load_notes_button.pack(pady=5)
-
         self.note_text = tk.Text(self.note_frame, 
                                  wrap="word", 
                                  bg=bg_light, 
@@ -423,9 +419,10 @@ class NotesScreen(ttk.Frame):
             messagebox.showwarning("Warning", "All fields must be filled out to save notes.")
             return
 
-        # Save notes with chapter/section and also associate with the open PDF
+        # Save notes with chapter/section
         self.note_manager.create_note_hierarchy(chapter, section, notes)
 
+        # Optionally associate notes with the open PDF
         if self.file_path:
             self.note_manager.create_note_hierarchy(self.file_path, "General", notes)
 
@@ -446,16 +443,8 @@ class NotesScreen(ttk.Frame):
     def delete_all_notes(self):
         if messagebox.askyesno("Delete All Notes", "Are you sure you want to delete all notes?"):
             self.note_manager.delete_all_notes()
-
-            # Also delete notes associated with the open PDF
-            if self.file_path:
-                self.note_manager.delete_notes_for_pdf(self.file_path)
-
             self.note_text.delete("1.0", "end")
             messagebox.showinfo("Success", "All notes deleted.")
-    
-    def delete_notes_for_pdf(self, file_path):
-        self.database_manager.delete_notes_by_chapter(file_path)
 
     def load_notes_for_section(self):
         chapter = self.chapter_entry.get().strip()
@@ -512,6 +501,15 @@ class NotesScreen(ttk.Frame):
                 self.prev_button.config(state="disabled")
             except Exception as e:
                 messagebox.showerror("Error", f"Failed to load PDF: {e}")
+    
+    def delete_notes_for_pdf(self, file_path):
+        """Delete notes associated with a specific PDF file."""
+        query = """
+        DELETE FROM note_hierarchy
+        WHERE chapter_title = :file_path
+        """
+        self.database_manager.save_data(query, {"file_path": file_path})
+        print(f"Notes associated with the file '{file_path}' have been deleted.")
 
 class ServerSetupScreen(ttk.Frame):
     def __init__(self, parent, controller):
