@@ -73,14 +73,6 @@ class NoteManager:
             print(f"Chapter: {row['chapter_title']}, Section: {row['section_heading']}, Notes: {row['notes']}")
         return result
 
-    def save_notes(self):
-        """Save notes to the database, prompting for hierarchy if necessary."""
-        chapter_title = input("Enter the chapter title: ")
-        section_heading = input("Enter the section heading: ")
-        notes = input("Enter notes to save: ")
-        self.note_manager.create_note_hierarchy(chapter_title, section_heading, notes)
-        print("Notes saved successfully.")
-
     def delete_all_notes(self):
         """Delete all notes and hierarchies from the database."""
         query = "DELETE FROM note_hierarchy"

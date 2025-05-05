@@ -146,7 +146,13 @@ class MainMenu(ttk.Frame):
         content = ttk.Frame(container)
         content.grid(row=1, column=1)
 
-        label = ttk.Label(content, text="Welcome to ARA\nYour Active Reading Assistant", style="Title.TLabel")
+        label = ttk.Label(
+            content,
+            text="Welcome to ARA\nYour Active Reading Assistant",
+            style="Title.TLabel",
+            justify="center",
+            anchor="center"
+        )
         label.pack(pady=20)
 
         ttk.Button(content, text="Notes", width=20, command=lambda: controller.show_frame(NotesScreen)).pack(pady=5)
@@ -223,10 +229,6 @@ class NotesScreen(ttk.Frame):
                                       highlightbackground=bg_light, 
                                       highlightcolor=accent_color)
         self.section_entry.pack(side="left", padx=5, pady=1)
-
-        # Button to load notes for the selected section
-        self.load_notes_button = ttk.Button(self.note_frame, text="Begin Notetaking", command=self.load_notes_for_section, width=20)
-        self.load_notes_button.pack(pady=5)
 
         self.note_text = tk.Text(self.note_frame, 
                                  wrap="word", 
@@ -315,27 +317,29 @@ class NotesScreen(ttk.Frame):
         back_btn = ttk.Button(self, text="Back to Main Menu", width=20, command=lambda: controller.show_frame(MainMenu))
         back_btn.grid(row=2, column=0, columnspan=2, pady=10)
 
+        # Bind the <<FocusOut>> event to the chapter and section entry fields
+        self.chapter_entry.bind("<Return>", lambda event: self.load_notes_for_section())
+        self.section_entry.bind("<Return>", lambda event: self.load_notes_for_section())
+
+
+
     # Methods from MainWindow class
     def load_pdf(self):
-        """Load a PDF file and display its first page in the PDF viewer."""
         file_path = filedialog.askopenfilename(
             title="Select PDF File",
             filetypes=[("PDF Files", "*.pdf")]
         )
         if file_path:
             try:
-                # Open the PDF and get the total number of pages
                 with fitz.open(file_path) as pdf:
                     self.total_pages = len(pdf)
 
-                # Reset to the first page
                 self.current_page = 0
                 self.file_path = file_path
 
-                # Display the first page
                 self.display_page(self.current_page)
+                self.load_notes_for_section()  # Automatically load notes for the PDF
 
-                # Enable navigation buttons if there are multiple pages
                 if self.total_pages > 1:
                     self.next_button.config(state="normal")
                 else:
@@ -416,17 +420,28 @@ class NotesScreen(ttk.Frame):
         chapter = self.chapter_entry.get().strip()
         section = self.section_entry.get().strip()
         notes = self.note_text.get("1.0", "end").strip()
+
         if not chapter or not section or not notes:
             messagebox.showwarning("Warning", "All fields must be filled out to save notes.")
             return
-        self.note_manager.create_note_hierarchy(chapter, section, notes)
+
+        # Save only the raw values
+        formatted_notes = f"{self.file_path or 'N/A'}\n{notes}"
+
+        # Save the notes under the respective chapter and section
+        self.note_manager.create_note_hierarchy(chapter, section, formatted_notes)
+
         messagebox.showinfo("Success", "Notes saved successfully.")
 
     def load_notes(self):
         notes = self.note_manager.load_notes()
         if notes:
             display = "\n\n".join(
-                f"Chapter: {n['chapter_title']}\nSection: {n['section_heading']}\nNotes: {n['notes']}" for n in notes
+                f"PDF: {n['notes'].splitlines()[0]}\n"
+                f"Chapter: {n['chapter_title']}\n"
+                f"Section: {n['section_heading']}\n"
+                f"Notes: {' '.join(n['notes'].splitlines()[1:])}"
+                for n in notes
             )
             self.note_text.delete("1.0", "end")
             self.note_text.insert("1.0", display)
@@ -441,19 +456,24 @@ class NotesScreen(ttk.Frame):
             messagebox.showinfo("Success", "All notes deleted.")
 
     def load_notes_for_section(self):
+        """Load notes for the specified chapter and section, or clear the note-taking box if none are found."""
         chapter = self.chapter_entry.get().strip()
         section = self.section_entry.get().strip()
+
         if not chapter or not section:
-            messagebox.showwarning("Warning", "Chapter and section must be filled.")
+            self.note_text.delete("1.0", "end")
             return
+
+        # Try to load notes by chapter and section
         notes = self.note_manager.load_notes()
         for row in notes:
             if row["chapter_title"] == chapter and row["section_heading"] == section:
                 self.note_text.delete("1.0", "end")
                 self.note_text.insert("1.0", row["notes"])
                 return
+
+        # Clear the note-taking box if no notes are found
         self.note_text.delete("1.0", "end")
-        messagebox.showinfo("No Notes", "No notes found for this chapter and section.")
 
     def toggle_prompts(self):
     
@@ -467,7 +487,7 @@ class NotesScreen(ttk.Frame):
     def on_preloaded_pdf_selected(self, event):
         selected = self.pdf_selector.get()
         self.pdf_selector.selection_clear()
-        
+
         if selected in self.preloaded_pdfs:
             self.file_path = self.preloaded_pdfs[selected]
             try:
@@ -476,11 +496,21 @@ class NotesScreen(ttk.Frame):
 
                 self.current_page = 0
                 self.display_page(self.current_page)
+                self.load_notes_for_section()  # Automatically load notes for the PDF
 
                 self.next_button.config(state="normal" if self.total_pages > 1 else "disabled")
                 self.prev_button.config(state="disabled")
             except Exception as e:
                 messagebox.showerror("Error", f"Failed to load PDF: {e}")
+    
+    def delete_notes_for_pdf(self, file_path):
+        """Delete notes associated with a specific PDF file."""
+        query = """
+        DELETE FROM note_hierarchy
+        WHERE chapter_title = :file_path
+        """
+        self.database_manager.save_data(query, {"file_path": file_path})
+        print(f"Notes associated with the file '{file_path}' have been deleted.")
 
 class ServerSetupScreen(ttk.Frame):
     def __init__(self, parent, controller):
@@ -491,8 +521,12 @@ class ServerSetupScreen(ttk.Frame):
         label.pack(pady=20)
 
         # Placeholder server setup info
-        instructions = ttk.Label(self, text="Instructions or fields for setting up the server will go here.")
+        instructions = ttk.Label(self, text="Select a user to connect:")
         instructions.pack(pady=10)
+
+        self.user_selector = ttk.Combobox(self, values=["User1", "User2", "User3"], state="readonly", width=30, style="CustomCombobox.TCombobox")
+        self.user_selector.set("Choose a User")
+        self.user_selector.pack(pady=10)
 
         #Back to the main menu button
         back_btn = ttk.Button(self, text="Back to Menu", command=lambda: controller.show_frame(MainMenu))
@@ -503,18 +537,39 @@ class AboutScreen(ttk.Frame):
         super().__init__(parent)
         self.controller = controller
 
-        label = ttk.Label(self, text="About ARA", style="Header.TLabel")
-        label.pack(pady=20)
+        # Page title
+        title = ttk.Label(self, text="About ARA", style="Title.TLabel")
+        title.pack(pady=20)
 
-        description = ttk.Label(
-            self,
-            text="ARA helps students actively read using the SQ3R method.\nSurvey, Question, Read, Recite, Review.\n How it works",
-            justify="center",
+
+        section1_text = (
+            "ARA (Active Reading Assistant) is a reading and note-taking tool built around the SQ3R method:\n"
+            "Survey, Question, Read, Recite, and Review.\n\n"
+            "It is designed to help people engage deeply with academic texts, organize their ideas, and\n"
+            "retain key information. ARA integrates PDF viewing, guided prompts, and structured note entry\n"
+            "into one easy to use interface."
         )
-        description.pack(pady=10)
+        section1_label = ttk.Label(self, text=section1_text, style="Body.TLabel")
+        section1_label.pack(padx=20, pady=10)
 
+        #How it Works 
+        section2_title = ttk.Label(self, text="How It Works", style="Header.TLabel", justify="center")
+        section2_title.pack(pady=(20, 0))
+
+        section2_text = (
+            "1. Load a PDF: Start by uploading a reading or class material.\n"
+            "2. Take Notes: Use the note-taking area to capture insights by chapter and section.\n"
+            "3. Use Prompts: Enable SQ3R checkboxes to guide your reading and reflection process.\n"
+            "4. Save & Review: Your notes are saved locally and can be revisited at any time.\n\n"
+            "By combining reading with active reflection, ARA helps you process material more effectively\n"
+            "and develop stronger study habits."
+        )
+        section2_label = ttk.Label(self, text=section2_text, style="Body.TLabel")
+        section2_label.pack(padx=20, pady=10)
+
+        # Back button
         back_btn = ttk.Button(self, text="Back to Menu", command=lambda: controller.show_frame(MainMenu))
-        back_btn.pack(pady=10)
+        back_btn.pack(pady=20)
 
 if __name__ == "__main__":
     app = ARA()
