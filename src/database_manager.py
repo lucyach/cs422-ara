@@ -39,31 +39,29 @@ class DatabaseManager:
         return success
 
 
-    def save_data(self, data):
+    def save_data(self, collectionname, data):
         if self.db == None:
             print("No database connection.")
             return None
 
         try:
             print(self.db_name)
-            result = self.db["Notes"].insert_one(data)
+            result = self.db[collectionname].insert_one(data)
             print(f"Data inserted into '{self.db_name}' with _id: {result.inserted_id}")
             return result.inserted_id
         except Exception as e:
             print(f"Failed to insert data: {e}")
             return None
 
-    def load_data(self, collection_name, query={}):
-        if self.db == None:
+    def load_data(self, active_pdf):
+        if self.db is None:
             print("No database connection.")
             return None
-
         try:
-            collection = self.db[collection_name]
-            result = collection.find_one(query)
-            print(f"Loaded '{collection_name}': {result}")
-            return result
-        
+            collection = self.db[active_pdf]
+            result = collection.find({}, {"_id": 0})
+            return  result
+
         except Exception as e:
             print(f"Failed to load data: {e}")
             return None

@@ -22,8 +22,9 @@ header_font = "Segoe UI", 14, "bold"
 text_font = "Segoe UI", 10
 
 database_manager = DatabaseManager()  # Initialize the database manager
-note_manager = NoteManager(database_manager)  # Pass the database manager to NoteManager
 pdf_manager = PDFManager()
+note_manager = NoteManager(database_manager)  # Pass the database manager to NoteManager
+
 
 default_creds = {"ARAUser1": "",
                  "ARAUser2": "",
@@ -352,10 +353,9 @@ class NotesScreen(ttk.Frame):
 
                 self.current_page = 0
                 self.file_path = file_path
-
+                note_manager.active_pdf = os.path.splitext(os.path.basename(file_path))[0]
                 self.display_page(self.current_page)
                 self.load_notes_for_section()  # Automatically load notes for the PDF
-
                 if self.total_pages > 1:
                     self.next_button.config(state="normal")
                 else:
@@ -450,10 +450,9 @@ class NotesScreen(ttk.Frame):
         messagebox.showinfo("Success", "Notes saved successfully.")
 
     def load_notes(self):
-        notes = self.note_manager.load_notes()
+        notes = note_manager.load_notes()
         if notes:
             display = "\n\n".join(
-                f"PDF: {n['notes'].splitlines()[0]}\n"
                 f"Chapter: {n['chapter_title']}\n"
                 f"Section: {n['section_heading']}\n"
                 f"Notes: {' '.join(n['notes'].splitlines()[1:])}"
@@ -467,14 +466,14 @@ class NotesScreen(ttk.Frame):
 
     def delete_all_notes(self):
         if messagebox.askyesno("Delete All Notes", "WARNING: Are you sure you want to delete all notes?"):
-            self.note_manager.delete_all_notes()
+            note_manager.delete_all_notes()
             self.note_text.delete("1.0", "end")
             messagebox.showinfo("Success", "All notes deleted.")
 
     def load_notes_for_section(self):
         """Load notes for the specified chapter and section, or clear the note-taking box if none are found."""
 
-        print("running")
+
         chapter = self.chapter_entry.get().strip()
         section = self.section_entry.get().strip()
 
@@ -483,6 +482,7 @@ class NotesScreen(ttk.Frame):
             return
 
         # Try to load notes by chapter and section
+
         notes = note_manager.load_notes()
         for row in notes:
             if row["chapter_title"] == chapter and row["section_heading"] == section:
