@@ -48,8 +48,11 @@ class NoteManager:
         result = self.database_manager.load_data(self.active_pdf)  # Use database_manager to load data
         return result
 
-    def delete_all_notes(self):
-        """Delete all notes and hierarchies from the database."""
-        
-        self.database_manager.save_data()
-
+    def delete_note(self, chapter_title, section_heading):
+        """Delete a specific note from the current PDF's MongoDB collection."""
+        collection = self.database_manager.db[str(self.active_pdf)]
+        result = collection.delete_one({
+            "chapter_title": chapter_title,
+            "section_heading": section_heading
+        })
+        print(f"Deleted {result.deleted_count} note(s).")

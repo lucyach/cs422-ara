@@ -204,10 +204,9 @@ class NotesScreen(ttk.Frame):
 
         # Buttons
         ttk.Button(self.button_frame, text="Load PDF", command=self.load_pdf, width=15).pack(side="left", padx=5, pady=5)
-        ttk.Button(self.button_frame, text="Create Note Hierarchy", command=self.create_note_hierarchy, width=25).pack(side="left", padx=5, pady=5)
         ttk.Button(self.button_frame, text="Save Notes", command=self.save_notes, width=15).pack(side="left", padx=5, pady=5)
         ttk.Button(self.button_frame, text="Load Notes", command=self.load_notes, width=15).pack(side="left", padx=5, pady=5)
-        ttk.Button(self.button_frame, text="Delete All Notes", command=self.delete_all_notes, width=20).pack(side="left", padx=5, pady=5)
+        ttk.Button(self.button_frame, text="Delete Note", command=self.delete_current_note, width=15).pack(side="left", padx=5, pady=5)
 
         # SQ3R checkbox prompts
         self.sq3r_enabled = tk.BooleanVar(value=True)
@@ -453,21 +452,6 @@ class NotesScreen(ttk.Frame):
 
         notes = note_manager.load_notes()
 
-            # if notes:
-            #     display = "\n\n".join(
-            #         f"Chapter: {n['chapter_title']}\n"
-            #         f"Section: {n['section_heading']}\n"
-            #         f"Notes: {' '.join(n['notes'].splitlines()[1:])}"
-            #         for n in notes
-            #     )
-            #     self.note_text.delete("1.0", "end")
-            #     self.note_text.insert("1.0", display)
-            # else:
-            #     self.note_text.delete("1.0", "end")
-
-            #     messagebox.showinfo("Loaded Notes", "No notes found.")
-            #     return
-
         popup = tk.Toplevel(self)
         popup.title("Select a Note")
         popup.geometry("500x300")
@@ -516,16 +500,21 @@ class NotesScreen(ttk.Frame):
 
             popup.destroy()
 
-            
-            
-
         ttk.Button(popup, text="Load Note", command=load_selected_note).pack(pady=10)
 
-    def delete_all_notes(self):
-        if messagebox.askyesno("Delete All Notes", "WARNING: Are you sure you want to delete all notes?"):
-            note_manager.delete_all_notes()
+    def delete_current_note(self):
+        """Delete the currently loaded note based on the chapter and section inputs."""
+        chapter = self.chapter_entry.get().strip()
+        section = self.section_entry.get().strip()
+
+        if not chapter or not section:
+            messagebox.showwarning("Warning", "Please enter both chapter and section to delete a note.")
+            return
+
+        if messagebox.askyesno("Delete Note", f"Are you sure you want to delete the note for:\n\nChapter: {chapter}\nSection: {section}?"):
+            note_manager.delete_note(chapter, section)
             self.note_text.delete("1.0", "end")
-            messagebox.showinfo("Success", "All notes deleted.")
+            messagebox.showinfo("Deleted", "The selected note has been deleted.")
 
     def load_notes_for_section(self):
         """Load notes for the specified chapter and section, or clear the note-taking box if none are found."""
@@ -571,7 +560,7 @@ class NotesScreen(ttk.Frame):
 
                 self.current_page = 0
                 self.display_page(self.current_page)
-                self.load_notes_for_section()  # Automatically load notes for the PDF
+                self.load_notes_for_section()
 
                 self.next_button.config(state="normal" if self.total_pages > 1 else "disabled")
                 self.prev_button.config(state="disabled")
