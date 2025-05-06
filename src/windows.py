@@ -441,10 +441,10 @@ class NotesScreen(ttk.Frame):
             return
 
         # Save only the raw values
-        formatted_notes = f"{self.file_path or 'N/A'}\n{notes}"
+        #formatted_notes = f"{self.file_path or 'N/A'}\n{notes}"
 
         # Save the notes under the respective chapter and section
-        note_manager.create_note_hierarchy(chapter, section, formatted_notes)
+        note_manager.create_note_hierarchy(chapter, section, notes)
 
         messagebox.showinfo("Success", "Notes saved successfully.")
 
@@ -490,11 +490,9 @@ class NotesScreen(ttk.Frame):
 
         def load_selected_note():
             choice = selected_note.get()
-            print(f"load_selected_notes\n{choice}")
             for n in notes:
                 label = f"{n['chapter_title']} - {n['section_heading']}"
                 if label == choice:
-                    print("if statement")
                     self.chapter_entry.delete(0, "end")
                     self.section_entry.delete(0, "end")
                     self.chapter_entry.insert(0, n["chapter_title"])
@@ -504,8 +502,16 @@ class NotesScreen(ttk.Frame):
                     return
             
             new_text = database_manager.load_notes_from_menu(choice, note_manager.active_pdf)
+
             self.note_text.delete("1.0", tk.END)
             self.note_text.insert("1.0", new_text)
+
+            parts = choice.split(" - ")
+
+            self.chapter_entry.delete(0, "end")
+            self.chapter_entry.insert(0, parts[0])
+            self.section_entry.delete(0, "end")
+            self.section_entry.insert(0, parts[1])
 
             popup.destroy()
 
@@ -577,7 +583,7 @@ class NotesScreen(ttk.Frame):
         DELETE FROM note_hierarchy
         WHERE chapter_title = :file_path
         """
-        database_manager.save_data(query, {"file_path": file_path})
+        #database_manager.save_data(query, {"file_path": file_path})
         print(f"Notes associated with the file '{file_path}' have been deleted.")
 
 class ServerSetupScreen(ttk.Frame):
