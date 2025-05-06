@@ -452,20 +452,6 @@ class NotesScreen(ttk.Frame):
     def load_notes(self):
 
         notes = note_manager.load_notes()
-        if notes:
-            display = "\n\n".join(
-                f"Chapter: {n['chapter_title']}\n"
-                f"Section: {n['section_heading']}\n"
-                f"Notes: {' '.join(n['notes'].splitlines()[1:])}"
-                for n in notes
-            )
-            self.note_text.delete("1.0", "end")
-            self.note_text.insert("1.0", display)
-        else:
-            self.note_text.delete("1.0", "end")
-
-            messagebox.showinfo("Loaded Notes", "No notes found.")
-            return
 
         popup = tk.Toplevel(self)
         popup.title("Select a Note")
@@ -489,6 +475,7 @@ class NotesScreen(ttk.Frame):
         note_dropdown.pack(pady=5)
 
         def load_selected_note():
+            print("trying to load note")
             choice = selected_note.get()
             for n in notes:
                 label = f"{n['chapter_title']} - {n['section_heading']}"
@@ -503,7 +490,7 @@ class NotesScreen(ttk.Frame):
                     popup.destroy()
                     return
 
-        ttk.Button(popup, text="Load Note", command=load_selected_note).pack(pady=10)
+        ttk.Button(popup, text="Load Note", command=lambda:load_selected_note).pack(pady=10)
 
     def delete_all_notes(self):
         if messagebox.askyesno("Delete All Notes", "WARNING: Are you sure you want to delete all notes?"):
