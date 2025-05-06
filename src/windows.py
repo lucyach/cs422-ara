@@ -292,9 +292,9 @@ class NotesScreen(ttk.Frame):
         ttk.Label(self.button_frame, text="Preloaded PDFs:").pack(side="left", padx=(10, 0), pady=5)
 
         self.preloaded_pdfs = {
-            "Sommerville - Chapter 1": os.path.abspath("../pdfs/SE_10e_Sommerville_Ch1.pdf"),
-            "Sommerville - Chapter 2": os.path.abspath("../pdfs/SE_10e_Sommerville_Ch2.pdf"),
-            "Sommerville - Chapter 22": os.path.abspath("../pdfs/SE_10e_Sommerville_Ch22.pdf"),
+            "Sommerville - Chapter 1": os.path.abspath("pdfs/SE_10e_Sommerville_Ch1.pdf"),
+            "Sommerville - Chapter 2": os.path.abspath("pdfs/SE_10e_Sommerville_Ch2.pdf"),
+            "Sommerville - Chapter 22": os.path.abspath("pdfs/SE_10e_Sommerville_Ch22.pdf"),
         }
 
 
