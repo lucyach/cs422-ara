@@ -32,40 +32,42 @@ default_creds = {"ARAUser1": "",
 
 
 script_dir = os.path.dirname(__file__)  # Folder where script is located
-file_path = os.path.join(script_dir, 'creds.json')
+file_path = os.path.join(script_dir, 'creds.json') # Path to the credentials file
 
-try:
-    with open(file_path, 'r') as file:
-            default_creds = json.load(file)
-except:
+try: # Attempt to load the credentials from a JSON file
+    with open(file_path, 'r') as file: # Open the JSON file
+            default_creds = json.load(file) # Load the credentials into a dictionary
+except: #   If the file is not found, print an error message
     print("Error, no credential file found!")
 
 class ARA(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("ARA - Active Reading Assistant")
-        self.geometry("1200x800")
+        self.title("ARA - Active Reading Assistant") # Set the window title
+        self.geometry("1200x800") # Set the window size
 
-        database_manager.connect("ARAUser1", default_creds.get("ARAUser1"))
+        database_manager.connect("ARAUser1", default_creds.get("ARAUser1")) #  Connect to the database with default credentials
 
+        # Set up the main window layout
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
         self.setup_custom_theme()
 
-        self.frames = {}
+        self.frames = {} # Dictionary to hold different frames
 
-        for F in (MainMenu, NotesScreen, ServerSetupScreen, AboutScreen):
-            frame = F(parent=self, controller=self)
-            self.frames[F] = frame
-            frame.grid(row=0, column=0, sticky="nsew")
+        # Create frames for different screens
+        for F in (MainMenu, NotesScreen, ServerSetupScreen, AboutScreen): # Iterate through the frames
+            frame = F(parent=self, controller=self) # Create an instance of the frame
+            self.frames[F] = frame # Store the frame in the dictionary
+            frame.grid(row=0, column=0, sticky="nsew") # Grid the frame in the main window
 
-        self.show_frame(MainMenu)
+        self.show_frame(MainMenu) # Show the main menu frame by default
 
-    def show_frame(self, frame_class):
-        frame = self.frames[frame_class]
-        frame.tkraise()
+    def show_frame(self, frame_class): # Show a frame for the given class
+        frame = self.frames[frame_class] # Get the frame from the dictionary
+        frame.tkraise() # Raise the frame to the top of the stack
 
-    def setup_custom_theme(self):
+    def setup_custom_theme(self): # Set up a custom theme for the application
         style = ttk.Style()
 
         # Use a base theme with support for custom styling
@@ -81,16 +83,19 @@ class ARA(tk.Tk):
                         font=(text_font),
                         relief="flat")
 
+        # Set specific styles for labels, buttons, and frames
         style.configure("TLabel",
                         background=bg_dark,
                         foreground=fg_light)
         
+        # Header and title styles
         style.configure("Header.TLabel",
                         background=bg_dark,
                         foreground=accent_color,
                         font=(header_font),
                         padding=10)
         
+        # Title label style
         style.configure("Title.TLabel",
                 background=bg_dark,
                 foreground=accent_color,
@@ -98,7 +103,7 @@ class ARA(tk.Tk):
                 padding=10,
                 justify="center")
 
-
+        # Button styles
         style.configure("TButton",
                         background=bg_medium,
                         foreground=fg_light,
@@ -130,6 +135,7 @@ class ARA(tk.Tk):
                   background=[("active", accent_color)],
                   foreground=[("active", fg_dark)])
         
+        # Custom Combobox style
         style.configure("CustomCombobox.TCombobox",
             fieldbackground=bg_light,
             background=bg_medium,
@@ -148,7 +154,7 @@ class ARA(tk.Tk):
 class MainMenu(ttk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
-        self.controller = controller
+        self.controller = controller # Reference to the main application
 
         # Make the MainMenu frame expand
         self.grid_rowconfigure(0, weight=1)
@@ -167,6 +173,7 @@ class MainMenu(ttk.Frame):
         content = ttk.Frame(container)
         content.grid(row=1, column=1)
 
+        # Set the background color of the content frame
         label = ttk.Label(
             content,
             text="Welcome to ARA\nYour Active Reading Assistant",
@@ -176,6 +183,7 @@ class MainMenu(ttk.Frame):
         )
         label.pack(pady=20)
 
+        # Create buttons for different functionalities
         ttk.Button(content, text="Notes", width=20, command=lambda: controller.show_frame(NotesScreen)).pack(pady=5)
         ttk.Button(content, text="Server Setup", width=20, command=lambda: controller.show_frame(ServerSetupScreen)).pack(pady=5)
         ttk.Button(content, text="About", width=20, command=lambda: controller.show_frame(AboutScreen)).pack(pady=5)
@@ -183,7 +191,7 @@ class MainMenu(ttk.Frame):
 class NotesScreen(ttk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
-        self.controller = controller
+        self.controller = controller # Reference to the main application
 
         # Layout frames for buttons, notes, and PDF viewer
         self.button_frame = ttk.Frame(self)
@@ -194,8 +202,8 @@ class NotesScreen(ttk.Frame):
         self.note_frame.grid(row=1, column=0, sticky="nsew")
         self.note_frame.grid_propagate(False)  # Prevent resizing based on content
 
-        self.pdf_frame = ttk.Frame(self)
-        self.pdf_frame.grid(row=1, column=1, sticky="nsew")
+        self.pdf_frame = ttk.Frame(self) # Frame for PDF viewer
+        self.pdf_frame.grid(row=1, column=1, sticky="nsew") # Grid the PDF frame
 
         # Adjust column weights to allocate more space to the PDF viewer
         self.grid_rowconfigure(1, weight=1) # Row for PDF viewer and note-taking box
@@ -232,6 +240,7 @@ class NotesScreen(ttk.Frame):
         self.chapter_entry.pack(side="left", padx=5, pady=1)
 
 
+        # Section entry field
         section_frame = ttk.Frame(self.note_frame)
         section_frame.pack(pady=5, padx=10, fill="x")
         ttk.Label(section_frame, text="Section:").pack(side="left", padx=5)
@@ -246,6 +255,7 @@ class NotesScreen(ttk.Frame):
                                       highlightcolor=accent_color)
         self.section_entry.pack(side="left", padx=5, pady=1)
 
+        # Note-taking area
         self.note_text = tk.Text(self.note_frame, 
                                  wrap="word", 
                                  bg=bg_light, 
@@ -257,7 +267,7 @@ class NotesScreen(ttk.Frame):
                                  highlightcolor=accent_color, 
                                  height=20)
         
-        self.note_text.pack(expand=True, fill="both", padx=10, pady=10)
+        self.note_text.pack(expand=True, fill="both", padx=10, pady=10) # Expand to fill the frame
 
         # PDF viewer
         ttk.Label(self.pdf_frame, text="PDF Viewer", style="Header.TLabel").pack(pady=10)
@@ -309,6 +319,7 @@ class NotesScreen(ttk.Frame):
             style="CustomCombobox.TCombobox"
         )
 
+        # Set the default text for the combobox
         self.pdf_selector.set("Select a PDF")
         self.pdf_selector.pack(side="left", padx=5, pady=5)
 
@@ -326,6 +337,7 @@ class NotesScreen(ttk.Frame):
             "REVIEW: Summarize key ideas and test yourself."
         ]
 
+        # Create checkboxes for each SQ3R prompt
         for text in sq3r_texts:
             var = tk.BooleanVar()
             checkbox = ttk.Checkbutton(self.note_frame, text=text, variable=var)
@@ -345,32 +357,33 @@ class NotesScreen(ttk.Frame):
 
     # Methods from MainWindow class
     def load_pdf(self):
-        file_path = filedialog.askopenfilename(
+        file_path = filedialog.askopenfilename( # Open file dialog to select a PDF
             title="Select PDF File",
             filetypes=[("PDF Files", "*.pdf")]
         )
-        if file_path:
+        if file_path: # Check if a file was selected
             try:
-                with fitz.open(file_path) as pdf:
-                    self.total_pages = len(pdf)
+                with fitz.open(file_path) as pdf: # Open the PDF file using PyMuPDF
+                    self.total_pages = len(pdf) # Get the total number of pages
 
-                self.current_page = 0
-                self.file_path = file_path
-                note_manager.active_pdf = os.path.splitext(os.path.basename(file_path))[0]
-                self.display_page(self.current_page)
+                # Reset current page and file path
+                self.current_page = 0 # Set current page to 0
+                self.file_path = file_path # Store the file path
+                note_manager.active_pdf = os.path.splitext(os.path.basename(file_path))[0] # Set the active PDF name
+                self.display_page(self.current_page) # Display the first page of the PDF
                 self.load_notes_for_section()  # Automatically load notes for the PDF
-                if self.total_pages > 1:
+                if self.total_pages > 1: # Enable navigation buttons if there are multiple pages
                     self.next_button.config(state="normal")
-                else:
+                else: # Disable the next button if there's only one page
                     self.next_button.config(state="disabled")
                 self.prev_button.config(state="disabled")
-            except Exception as e:
+            except Exception as e: # Handle any errors that occur during PDF loading
                 messagebox.showerror("Error", f"Failed to load PDF: {e}")
             
     def display_page(self, page_number):
         """Display a specific page of the PDF and make it responsive to window resizing."""
         try:
-            self.current_page = page_number
+            self.current_page = page_number # Set the current page
 
             # Render the raw image for the current page
             raw_image = pdf_manager.render_page_as_image(self.file_path, page_number, dpi=100)
@@ -389,6 +402,7 @@ class NotesScreen(ttk.Frame):
             img_ratio = raw_image.width / raw_image.height
             canvas_ratio = canvas_width / canvas_height
 
+            # Determine new dimensions based on aspect ratio
             if img_ratio > canvas_ratio:
                 new_width = canvas_width
                 new_height = int(canvas_width / img_ratio)
@@ -396,6 +410,7 @@ class NotesScreen(ttk.Frame):
                 new_height = canvas_height
                 new_width = int(canvas_height * img_ratio)
 
+            # Resize the image to fit the canvas
             resized_image = raw_image.resize((new_width, new_height), Image.Resampling.LANCZOS)
 
             # Convert and display
@@ -406,41 +421,41 @@ class NotesScreen(ttk.Frame):
             self.canvas.create_image(x, y, anchor="nw", image=self.tk_image)
             self.canvas.config(scrollregion=self.canvas.bbox("all"))
 
-        except Exception as e:
+        except Exception as e: # Handle any errors that occur during page display
             messagebox.showerror("Error", f"Failed to display page: {e}")
 
     def show_next_page(self):
         """Display the next page of the PDF."""
-        if self.current_page < self.total_pages - 1:
-            self.current_page += 1
-            self.display_page(self.current_page)
+        if self.current_page < self.total_pages - 1: # Check if there are more pages
+            self.current_page += 1 # Increment the current page
+            self.display_page(self.current_page) #  Display the next page
 
             # Update navigation buttons
             self.prev_button.config(state="normal")
-            if self.current_page == self.total_pages - 1:
-                self.next_button.config(state="disabled")
+            if self.current_page == self.total_pages - 1: # If on the last page
+                self.next_button.config(state="disabled") # Disable the next button
 
     def show_previous_page(self):
         """Display the previous page of the PDF."""
-        if self.current_page > 0:
-            self.current_page -= 1
-            self.display_page(self.current_page)
+        if self.current_page > 0: # Check if there are previous pages
+            self.current_page -= 1 # Decrement the current page
+            self.display_page(self.current_page) #  Display the previous page
 
             # Update navigation buttons
             self.next_button.config(state="normal")
-            if self.current_page == 0:
-                self.prev_button.config(state="disabled")
+            if self.current_page == 0: # If on the first page
+                self.prev_button.config(state="disabled") # Disable the previous button
 
-    def create_note_hierarchy(self):
-        self.note_text.delete("1.0", "end")
+    def create_note_hierarchy(self): # Create a new note hierarchy
+        self.note_text.delete("1.0", "end") # Clear the note-taking area
         messagebox.showinfo("Create Note Hierarchy", "Please enter the chapter title, section heading, and notes in the note-taking area.")
 
-    def save_notes(self):
-        chapter = self.chapter_entry.get().strip()
-        section = self.section_entry.get().strip()
-        notes = self.note_text.get("1.0", "end").strip()
+    def save_notes(self): # Save notes to the database
+        chapter = self.chapter_entry.get().strip() # Get the chapter title
+        section = self.section_entry.get().strip() # Get the section heading
+        notes = self.note_text.get("1.0", "end").strip() # Get the notes from the text box
 
-        if not chapter or not section or not notes:
+        if not chapter or not section or not notes: # Check if all fields are filled out
             messagebox.showwarning("Warning", "All fields must be filled out to save notes.")
             return
 
@@ -450,23 +465,26 @@ class NotesScreen(ttk.Frame):
         # Save the notes under the respective chapter and section
         note_manager.create_note_hierarchy(chapter, section, notes)
 
-        messagebox.showinfo("Success", "Notes saved successfully.")
+        messagebox.showinfo("Success", "Notes saved successfully.") # Show success message
 
-    def load_notes(self):
+    def load_notes(self): # Load notes from the database
 
         notes = note_manager.load_notes()
 
+
+        # Create a popup window to select a note
         popup = tk.Toplevel(self)
         popup.title("Select a Note")
         popup.geometry("500x300")
         popup.configure(bg=bg_dark)
 
+        # Set up the popup window style
         ttk.Label(popup, text="Select a note to load:", style="Header.TLabel").pack(pady=10)
 
         # Format: "Chapter: X - Section: Y"
         options = [f"{n['chapter_title']} - {n['section_heading']}" for n in notes]
-        selected_note = tk.StringVar()
-        note_dropdown = ttk.Combobox(
+        selected_note = tk.StringVar() # Variable to hold the selected note
+        note_dropdown = ttk.Combobox( # Create a dropdown for note selection
             popup,
             values=options,
             state="readonly",
@@ -474,14 +492,15 @@ class NotesScreen(ttk.Frame):
             width=50,
             style="CustomCombobox.TCombobox"  # Match style here
         )
-        note_dropdown.set("Choose a note...")
-        note_dropdown.pack(pady=5)
+        note_dropdown.set("Choose a note...") # Set default text
+        note_dropdown.pack(pady=5) # Pack the dropdown
 
+        # Load the selected note into the text box
         def load_selected_note():
             choice = selected_note.get()
-            for n in notes:
+            for n in notes: # Iterate through the notes to find the selected one
                 label = f"{n['chapter_title']} - {n['section_heading']}"
-                if label == choice:
+                if label == choice: # If the selected note matches the label
                     self.chapter_entry.delete(0, "end")
                     self.section_entry.delete(0, "end")
                     self.chapter_entry.insert(0, n["chapter_title"])
@@ -504,7 +523,9 @@ class NotesScreen(ttk.Frame):
 
             popup.destroy()
 
+        # Create a button to load the selected note
         ttk.Button(popup, text="Load Note", command=load_selected_note).pack(pady=10)
+
 
     def delete_current_note(self):
         """Delete the currently loaded note based on the chapter and section inputs."""
@@ -520,56 +541,58 @@ class NotesScreen(ttk.Frame):
             self.note_text.delete("1.0", "end")
             messagebox.showinfo("Deleted", "The selected note has been deleted.")
 
+
     def load_notes_for_section(self):
         """Load notes for the specified chapter and section, or clear the note-taking box if none are found."""
+        chapter = self.chapter_entry.get().strip() # Get the chapter title
+        section = self.section_entry.get().strip() # Get the section heading
 
-
-        chapter = self.chapter_entry.get().strip()
-        section = self.section_entry.get().strip()
-
-        if not chapter or not section:
-            self.note_text.delete("1.0", "end")
+        if not chapter or not section: # Check if both fields are filled out
+            self.note_text.delete("1.0", "end") # Clear the note-taking area
             return
 
         # Try to load notes by chapter and section
 
-        notes = note_manager.load_notes()
-        for row in notes:
-            if row["chapter_title"] == chapter and row["section_heading"] == section:
-                self.note_text.delete("1.0", "end")
-                self.note_text.insert("1.0", row["notes"])
+        notes = note_manager.load_notes() # Load all notes from the database
+        for row in notes: # Iterate through the notes to find the matching chapter and section
+            if row["chapter_title"] == chapter and row["section_heading"] == section: # Check if the chapter and section match
+                self.note_text.delete("1.0", "end") # Clear the note-taking area
+                self.note_text.insert("1.0", row["notes"]) # Insert the loaded notes
                 return
 
         # Clear the note-taking box if no notes are found
         self.note_text.delete("1.0", "end")
 
-    def toggle_prompts(self):
+    def toggle_prompts(self): # Toggle the visibility of SQ3R prompts
     
-        if self.sq3r_enabled.get():
-            for checkbox in self.sq3r_checkboxes:
-                checkbox.pack(anchor="w", padx=10)
-        else:
-            for checkbox in self.sq3r_checkboxes:
-                checkbox.pack_forget()
+        if self.sq3r_enabled.get(): # Check if SQ3R prompts are enabled
+            for checkbox in self.sq3r_checkboxes: # Show the checkboxes
+                checkbox.pack(anchor="w", padx=10) # Pack them with padding
+        else: # If disabled, hide the checkboxes
+            for checkbox in self.sq3r_checkboxes: # Hide the checkboxes
+                checkbox.pack_forget() # Remove them from the layout
     
-    def on_preloaded_pdf_selected(self, event):
+    def on_preloaded_pdf_selected(self, event): # Handle selection of preloaded PDFs
+        """Load the selected preloaded PDF and display its first page."""
         selected = self.pdf_selector.get()
         self.pdf_selector.selection_clear()
         note_manager.active_pdf = selected
 
-        if selected in self.preloaded_pdfs:
-            self.file_path = self.preloaded_pdfs[selected]
-            try:
-                with fitz.open(self.file_path) as pdf:
-                    self.total_pages = len(pdf)
+        if selected in self.preloaded_pdfs: # Check if the selected PDF is in the preloaded list
+            self.file_path = self.preloaded_pdfs[selected] # Get the file path of the selected PDF
+            try: # Open the PDF file using PyMuPDF
+                with fitz.open(self.file_path) as pdf: # Open the PDF file
+                    self.total_pages = len(pdf) # Get the total number of pages
+
 
                 self.current_page = 0
                 self.display_page(self.current_page)
                 #self.load_notes_for_section()
 
-                self.next_button.config(state="normal" if self.total_pages > 1 else "disabled")
-                self.prev_button.config(state="disabled")
-            except Exception as e:
+
+                self.next_button.config(state="normal" if self.total_pages > 1 else "disabled") # Enable next button if there are multiple pages
+                self.prev_button.config(state="disabled") # Disable previous button if on the first page
+            except Exception as e: # Handle any errors that occur during PDF loading
                 messagebox.showerror("Error", f"Failed to load PDF: {e}")
     
     def delete_notes_for_pdf(self, file_path):
@@ -581,11 +604,12 @@ class NotesScreen(ttk.Frame):
         #database_manager.save_data(query, {"file_path": file_path})
         print(f"Notes associated with the file '{file_path}' have been deleted.")
 
-class ServerSetupScreen(ttk.Frame):
+class ServerSetupScreen(ttk.Frame): # Server setup screen for connecting to the database
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
 
+        # Make the ServerSetupScreen frame expand
         label = ttk.Label(self, text="Server Setup Page", style="Header.TLabel")
         label.pack(pady=20)
 
@@ -607,23 +631,19 @@ class ServerSetupScreen(ttk.Frame):
         self.status_label = ttk.Label(self, text="Connected to ARAUser1 by default", justify="center", foreground="white")
         self.status_label.pack()
 
-    def connection_verification(self):
-        user = self.user_selector.get()
-        creds = default_creds.get(user)
+    def connection_verification(self): # Verify the connection to the database
+        user = self.user_selector.get() # Get the selected user from the combobox
+        creds = default_creds.get(user) # Get the credentials for the selected user
         
-
-        value = database_manager.change_client(user, creds)
+        value = database_manager.change_client(user, creds) # Attempt to connect to the database with the selected user and credentials
         
-
-        if value[0] == True:
+        if value[0] == True: # If the connection is successful
             self.status_label.config(text=f"Successfully connected as {user}", foreground="green")
         else:
             self.status_label.config(text=f"Failed to connect as {user}:\n{value[1]}", justify="center",foreground="orange")
 
-        
-                
 
-class AboutScreen(ttk.Frame):
+class AboutScreen(ttk.Frame): # About screen for the application
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
@@ -632,7 +652,7 @@ class AboutScreen(ttk.Frame):
         title = ttk.Label(self, text="About ARA", style="Title.TLabel")
         title.pack(pady=20)
 
-
+        # Section 1: What is ARA?
         section1_text = (
             "ARA (Active Reading Assistant) is a reading and note-taking tool built around the SQ3R method:\n"
             "Survey, Question, Read, Recite, and Review.\n\n"

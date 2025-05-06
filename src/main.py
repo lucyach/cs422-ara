@@ -14,12 +14,14 @@ from windows import *
 # Main application structure
 class ActiveReadingAssistant:
     def __init__(self):
-        self.pdf_manager = PDFManager()
-        
-    def start(self):
+
+        self.pdf_manager = PDFManager() # Initialize PDFManager
+
+    def start(self): # Start the application
+
         print("Starting ARA client..")
-        Window = ARA()
-        Window.mainloop()
+        Window = ARA() # Initialize the main window
+        Window.mainloop() # Start the main loop
 
 # Main entry point
 if __name__ == "__main__":
