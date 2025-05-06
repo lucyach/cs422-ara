@@ -3,60 +3,55 @@ Note Manager Module
 This module manages the creation, saving, and loading of notes.
 """
 
+
 class NoteManager:
     def __init__(self, database_manager):
         self.database_manager = database_manager
-        self._initialize_note_hierarchy_table()
+        self.active_pdf = ""
+        #self._initialize_note_hierarchy_table()
 
-    def _initialize_note_hierarchy_table(self):
-        """Ensure the database has the required table for note hierarchy."""
-        query = """
-        CREATE TABLE IF NOT EXISTS note_hierarchy (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            chapter_title TEXT NOT NULL,
-            section_heading TEXT NOT NULL,
-            notes TEXT NOT NULL
-        )
-        """
-        self.database_manager.save_data(query, {})
+    # def _initialize_note_hierarchy_table(self):
+    #     """Ensure the database has the required table for note hierarchy."""
+    #     query = """
+    #     CREATE TABLE IF NOT EXISTS note_hierarchy (
+    #         id INTEGER PRIMARY KEY AUTOINCREMENT,
+    #         chapter_title TEXT NOT NULL,
+    #         section_heading TEXT NOT NULL,
+    #         notes TEXT NOT NULL
+    #     )
+    #     """
+    #     self.database_manager.save_data(query, {})
 
     def create_note_hierarchy(self, chapter_title, section_heading, notes):
         """Create or update a hierarchical structure for notes."""
-        # Check if the hierarchy already exists
-        query_check = """
-        SELECT id FROM note_hierarchy
-        WHERE chapter_title = :chapter_title AND section_heading = :section_heading
-        """
-        existing_entry = self.database_manager.load_data(query_check, {
+        collection = self.database_manager.db[str(self.active_pdf)]
+
+        # Check if a note for this chapter and section already exists
+        existing_entry = collection.find_one({
             "chapter_title": chapter_title,
             "section_heading": section_heading
         })
 
         if existing_entry:
-            # Update the existing entry
-            query_update = """
-            UPDATE note_hierarchy
-            SET notes = :notes
-            WHERE chapter_title = :chapter_title AND section_heading = :section_heading
-            """
-            self.database_manager.save_data(query_update, {
-                "chapter_title": chapter_title,
-                "section_heading": section_heading,
-                "notes": notes
-            })
-            print(f"Note hierarchy updated: Chapter '{chapter_title}', Section '{section_heading}'")
+            current_notes = existing_entry.get("notes", "")
+            updated_notes = current_notes + "\n" + notes  # or any delimiter
+
+            result = collection.update_one(
+                {"chapter_title": chapter_title, "section_heading": section_heading},
+                {"$set": {"notes": updated_notes}}
+            )
+
+            print("Note updated with appended content.")
         else:
-            # Insert a new entry
-            query_insert = """
-            INSERT INTO note_hierarchy (chapter_title, section_heading, notes)
-            VALUES (:chapter_title, :section_heading, :notes)
-            """
-            self.database_manager.save_data(query_insert, {
+            new_note = {
                 "chapter_title": chapter_title,
                 "section_heading": section_heading,
                 "notes": notes
-            })
-            print(f"Note hierarchy created: Chapter '{chapter_title}', Section '{section_heading}'")
+            }
+            result = collection.insert_one(new_note)
+            self.database_manager.save_data(self.active_pdf, new_note)
+            print("New note inserted.")
+
 
     def save_notes(self, chapter_title, section_heading, notes):
         """Save notes to the database."""
@@ -65,17 +60,11 @@ class NoteManager:
 
     def load_notes(self):
         """Load notes from the database."""
-        query = "SELECT chapter_title, section_heading, notes FROM note_hierarchy"
-        result = self.database_manager.load_data(query)  # Use database_manager to load data
-        print("Loaded notes:")
-        for row in result:
-            # Access rows as dictionaries
-            print(f"Chapter: {row['chapter_title']}, Section: {row['section_heading']}, Notes: {row['notes']}")
+        result = self.database_manager.load_data(self.active_pdf)  # Use database_manager to load data
         return result
 
     def delete_all_notes(self):
         """Delete all notes and hierarchies from the database."""
-        query = "DELETE FROM note_hierarchy"
-        self.database_manager.save_data(query, {})
-        print("All notes and hierarchies have been deleted.")
+        
+        self.database_manager.save_data()
 
