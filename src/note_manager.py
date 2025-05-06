@@ -7,20 +7,7 @@ This module manages the creation, saving, and loading of notes.
 class NoteManager:
     def __init__(self, database_manager):
         self.database_manager = database_manager
-        self.active_pdf = ""
-        #self._initialize_note_hierarchy_table()
-
-    # def _initialize_note_hierarchy_table(self):
-    #     """Ensure the database has the required table for note hierarchy."""
-    #     query = """
-    #     CREATE TABLE IF NOT EXISTS note_hierarchy (
-    #         id INTEGER PRIMARY KEY AUTOINCREMENT,
-    #         chapter_title TEXT NOT NULL,
-    #         section_heading TEXT NOT NULL,
-    #         notes TEXT NOT NULL
-    #     )
-    #     """
-    #     self.database_manager.save_data(query, {})
+        self.active_pdf = "Notes"
 
     def create_note_hierarchy(self, chapter_title, section_heading, notes):
         """Create or update a hierarchical structure for notes."""
