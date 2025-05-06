@@ -21,7 +21,7 @@ class DatabaseManager:
         uri = f"mongodb+srv://{db_username}:{db_password}@araproject.iepyikz.mongodb.net/?retryWrites=true&w=majority&appName=ARAProject"
 
         try:
-            self.client = MongoClient(uri, serverSelectionTimeoutMS=5000)
+            self.client = MongoClient(uri, serverSelectionTimeoutMS=5000, tlsCAFile=certifi.where()) # Connect to the MongoDB server
             self.client.admin.command('ping')
             print(f"Successfully connected as {db_username}")
             self.db_name = db_username
