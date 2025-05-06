@@ -53,10 +53,18 @@ class NoteManager:
             print("New note inserted.")
 
 
-    def save_notes(self, chapter_title, section_heading, notes):
-        """Save notes to the database."""
-        self.create_note_hierarchy(chapter_title, section_heading, notes)
-        print("Notes saved successfully.")
+    def save_note_with_pdf_path(self, chapter_title, section_heading, notes, pdf_path):
+        # Always use a string (default to 'N/A' if None)
+        pdf_path = pdf_path or "N/A"
+
+        notes_lines = notes.strip().splitlines()
+        if notes_lines and pdf_path in notes_lines[0]:
+            formatted = notes.strip()
+        else:
+            formatted = f"{pdf_path}\n{notes.strip()}"
+
+        self.create_note_hierarchy(chapter_title, section_heading, formatted)
+
 
     def load_notes(self):
         """Load notes from the database."""
@@ -67,4 +75,30 @@ class NoteManager:
         """Delete all notes and hierarchies from the database."""
         
         self.database_manager.save_data()
+
+    def get_note_labels(self):
+        """Return list of formatted note labels: Chapter - Section"""
+        notes = self.load_notes()
+        return [f"{n['chapter_title']} - {n['section_heading']}" for n in notes]
+
+    def get_note_by_label(self, label):
+        """Return note that matches a given label like 'Chapter - Section'"""
+        notes = self.load_notes()
+        for n in notes:
+            if f"{n['chapter_title']} - {n['section_heading']}" == label:
+                return n
+        return None
+    
+    def delete_note(self, chapter_title, section_heading):
+        """Delete a single note based on chapter and section."""
+        query = """
+        DELETE FROM note_hierarchy
+        WHERE chapter_title = :chapter_title AND section_heading = :section_heading
+        """
+        self.database_manager.save_data(query, {
+            "chapter_title": chapter_title,
+            "section_heading": section_heading
+        })
+        print(f"Deleted note: Chapter '{chapter_title}', Section '{section_heading}'")
+
 

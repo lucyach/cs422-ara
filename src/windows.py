@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 import tkinter as tk
 from tkinter import messagebox, filedialog
 from tkinter import ttk
@@ -7,20 +8,23 @@ from PIL import Image, ImageTk
 import fitz  # PyMuPDF library for handling PDFs
 import json, os
 from database_manager import DatabaseManager
+=======
+"""
+File: windows.py
+Purpose: GUI interface for the ARA (Active Reading Assistant) application.
+         This module contains all Tkinter-based visual components, navigation,
+         and user interaction logic for loading PDFs, taking notes using the
+         SQ3R method, and viewing saved notes.
+>>>>>>> Stashed changes
 
-# Global colors
-bg_dark = "#1e1e1e"
-bg_medium = "#2c2c2c"
-bg_light = "#3a3a3a"
-fg_light = "#f0f0f0"
-fg_dark = "#000000"
-accent_color = "#98ff98"
+System: ARA is a note-taking assistant focused on improving reading comprehension
+        through structured prompts. This GUI works with supporting modules:
+        note_manager.py, pdf_manager.py, and database_manager.py.
 
-# Global fonts
-title_font = "Segoe UI", 25, "bold"
-header_font = "Segoe UI", 14, "bold"
-text_font = "Segoe UI", 10
+Created: April 2025
+Authors: Lucy Acheson. Evelyn Orozco, Angel Rivera
 
+<<<<<<< Updated upstream
 database_manager = DatabaseManager()  # Initialize the database manager
 pdf_manager = PDFManager()
 note_manager = NoteManager(database_manager)  # Pass the database manager to NoteManager
@@ -39,6 +43,31 @@ try:
             default_creds = json.load(file)
 except:
     print("Error, no credential file found!")
+=======
+"""
+
+import tkinter as tk  # Core GUI toolkit
+from tkinter import messagebox, filedialog  # Dialog utilities for file selection and messages
+from tkinter import ttk  # Themed Tkinter widgets
+from pdf_manager import PDFManager  # Manages PDF rendering and interaction
+from note_manager import NoteManager  # Handles note CRUD operations and logic
+from PIL import Image, ImageTk  # Image manipulation for displaying PDF pages
+import fitz  # PyMuPDF - used to access and render PDF files
+from database_manager import DatabaseManager  # Manages DB access and schema
+
+# ---- Color Palette ----
+bg_dark = "#1e1e1e"      # Main background color (dark)
+bg_medium = "#2c2c2c"    # Medium-tone background for frames/buttons
+bg_light = "#3a3a3a"     # Light-tone background for entry/text areas
+fg_light = "#f0f0f0"     # Light font color for contrast
+fg_dark = "#000000"      # Dark font color for highlighting
+accent_color = "#98ff98" # Accent highlight (mint green)
+
+# ---- Font Settings ----
+title_font = "Segoe UI", 25, "bold"   # Used for page titles
+header_font = "Segoe UI", 14, "bold"  # Used for section headers
+text_font = "Segoe UI", 10            # Default text font
+>>>>>>> Stashed changes
 
 class ARA(tk.Tk):
     def __init__(self):
@@ -203,11 +232,19 @@ class NotesScreen(ttk.Frame):
         self.grid_columnconfigure(1, weight=4)  # PDF viewer column
 
         # Buttons
+<<<<<<< Updated upstream
         ttk.Button(self.button_frame, text="Load PDF", command=self.load_pdf, width=15).pack(side="left", padx=5, pady=5)
         ttk.Button(self.button_frame, text="Create Note Hierarchy", command=self.create_note_hierarchy, width=25).pack(side="left", padx=5, pady=5)
         ttk.Button(self.button_frame, text="Save Notes", command=self.save_notes, width=15).pack(side="left", padx=5, pady=5)
         ttk.Button(self.button_frame, text="Load Notes", command=self.load_notes, width=15).pack(side="left", padx=5, pady=5)
         ttk.Button(self.button_frame, text="Delete All Notes", command=self.delete_all_notes, width=20).pack(side="left", padx=5, pady=5)
+=======
+        ttk.Button(self.button_frame, text="1. Load PDF", command=self.load_pdf, width=15).pack(side="left", padx=5, pady=5)
+        ttk.Button(self.button_frame, text="2. Save Notes", command=self.save_notes, width=15).pack(side="left", padx=5, pady=5)
+        ttk.Button(self.button_frame, text="3. Load Notes", command=self.load_notes, width=15).pack(side="left", padx=5, pady=5)
+        ttk.Button(self.button_frame, text="4. Delete Loaded Note", command=self.delete_current_note, width=20).pack(side="left", padx=5, pady=5)
+        ttk.Button(self.button_frame, text="5. Delete All Notes", command=self.delete_all_notes, width=20).pack(side="left", padx=5, pady=5)
+>>>>>>> Stashed changes
 
         # SQ3R checkbox prompts
         self.sq3r_enabled = tk.BooleanVar(value=True)
@@ -338,8 +375,6 @@ class NotesScreen(ttk.Frame):
         self.chapter_entry.bind("<Return>", lambda event: self.load_notes_for_section())
         self.section_entry.bind("<Return>", lambda event: self.load_notes_for_section())
 
-
-
     # Methods from MainWindow class
     def load_pdf(self):
         file_path = filedialog.askopenfilename(
@@ -428,10 +463,6 @@ class NotesScreen(ttk.Frame):
             if self.current_page == 0:
                 self.prev_button.config(state="disabled")
 
-    def create_note_hierarchy(self):
-        self.note_text.delete("1.0", "end")
-        messagebox.showinfo("Create Note Hierarchy", "Please enter the chapter title, section heading, and notes in the note-taking area.")
-
     def save_notes(self):
         chapter = self.chapter_entry.get().strip()
         section = self.section_entry.get().strip()
@@ -441,15 +472,20 @@ class NotesScreen(ttk.Frame):
             messagebox.showwarning("Warning", "All fields must be filled out to save notes.")
             return
 
+<<<<<<< Updated upstream
         # Save only the raw values
         formatted_notes = f"{self.file_path or 'N/A'}\n{notes}"
 
         # Save the notes under the respective chapter and section
         note_manager.create_note_hierarchy(chapter, section, formatted_notes)
+=======
+        self.note_manager.save_note_with_pdf_path(chapter, section, notes, self.file_path)
+>>>>>>> Stashed changes
 
         messagebox.showinfo("Success", "Notes saved successfully.")
 
     def load_notes(self):
+<<<<<<< Updated upstream
 
         notes = note_manager.load_notes()
         if notes:
@@ -464,6 +500,10 @@ class NotesScreen(ttk.Frame):
         else:
             self.note_text.delete("1.0", "end")
 
+=======
+        note_labels = self.note_manager.get_note_labels()
+        if not note_labels:
+>>>>>>> Stashed changes
             messagebox.showinfo("Loaded Notes", "No notes found.")
             return
 
@@ -474,34 +514,28 @@ class NotesScreen(ttk.Frame):
 
         ttk.Label(popup, text="Select a note to load:", style="Header.TLabel").pack(pady=10)
 
-        # Format: "Chapter: X - Section: Y"
-        options = [f"{n['chapter_title']} - {n['section_heading']}" for n in notes]
         selected_note = tk.StringVar()
         note_dropdown = ttk.Combobox(
             popup,
-            values=options,
+            values=note_labels,
             state="readonly",
             textvariable=selected_note,
             width=50,
-            style="CustomCombobox.TCombobox"  # Match style here
+            style="CustomCombobox.TCombobox"
         )
         note_dropdown.set("Choose a note...")
         note_dropdown.pack(pady=5)
 
         def load_selected_note():
-            choice = selected_note.get()
-            for n in notes:
-                label = f"{n['chapter_title']} - {n['section_heading']}"
-                if label == choice:
-                    self.chapter_entry.delete(0, "end")
-                    self.section_entry.delete(0, "end")
-                    self.chapter_entry.insert(0, n["chapter_title"])
-                    self.section_entry.insert(0, n["section_heading"])
-
-                    self.note_text.delete("1.0", "end")
-                    self.note_text.insert("1.0", n["notes"])
-                    popup.destroy()
-                    return
+            note = self.note_manager.get_note_by_label(selected_note.get())
+            if note:
+                self.chapter_entry.delete(0, "end")
+                self.section_entry.delete(0, "end")
+                self.chapter_entry.insert(0, note["chapter_title"])
+                self.section_entry.insert(0, note["section_heading"])
+                self.note_text.delete("1.0", "end")
+                self.note_text.insert("1.0", note["notes"])
+            popup.destroy()
 
         ttk.Button(popup, text="Load Note", command=load_selected_note).pack(pady=10)
 
@@ -562,6 +596,7 @@ class NotesScreen(ttk.Frame):
             except Exception as e:
                 messagebox.showerror("Error", f"Failed to load PDF: {e}")
     
+<<<<<<< Updated upstream
     def delete_notes_for_pdf(self, file_path):
         """Delete notes associated with a specific PDF file."""
         query = """
@@ -570,6 +605,21 @@ class NotesScreen(ttk.Frame):
         """
         database_manager.save_data(query, {"file_path": file_path})
         print(f"Notes associated with the file '{file_path}' have been deleted.")
+=======
+    def delete_current_note(self):
+        chapter = self.chapter_entry.get().strip()
+        section = self.section_entry.get().strip()
+
+        if not chapter or not section:
+            messagebox.showwarning("Warning", "Please specify both Chapter and Section to delete a note.")
+            return
+
+        if messagebox.askyesno("Delete Note", f"Delete note for:\nChapter: {chapter}\nSection: {section}?"):
+            self.note_manager.delete_note(chapter, section)
+            self.note_text.delete("1.0", "end")
+            messagebox.showinfo("Success", "Note deleted.")
+
+>>>>>>> Stashed changes
 
 class ServerSetupScreen(ttk.Frame):
     def __init__(self, parent, controller):
