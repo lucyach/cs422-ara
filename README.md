@@ -20,7 +20,7 @@ ara
 1. Clone the repository:
    ```bash
    git clone <repository-url>
-   cd ara
+   cd cs422-ara
    ```
 
 2. Install the required dependencies:
