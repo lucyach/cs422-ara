@@ -1,0 +1,19 @@
+## Installation
+1. Clone the repository:
+   ```bash
+   git clone <repository-url>
+   cd cs422-ara
+   ```
+
+2. Install the required dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+## Usage
+To run the application, execute the following command in your terminal:
+```bash
+python src/main.py
+```
+
+Note: You may have to use `python3` and `pip3` if using the latest Python version.
