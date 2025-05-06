@@ -214,7 +214,7 @@ class NotesScreen(ttk.Frame):
         ttk.Button(self.button_frame, text="Load PDF", command=self.load_pdf, width=15).pack(side="left", padx=5, pady=5)
         ttk.Button(self.button_frame, text="Save Notes", command=self.save_notes, width=15).pack(side="left", padx=5, pady=5)
         ttk.Button(self.button_frame, text="Load Notes", command=self.load_notes, width=15).pack(side="left", padx=5, pady=5)
-        ttk.Button(self.button_frame, text="Delete All Notes", command=self.delete_all_notes, width=20).pack(side="left", padx=5, pady=5)
+        ttk.Button(self.button_frame, text="Delete Note", command=self.delete_current_note, width=15).pack(side="left", padx=5, pady=5)
 
         # SQ3R checkbox prompts
         self.sq3r_enabled = tk.BooleanVar(value=True)
@@ -301,13 +301,16 @@ class NotesScreen(ttk.Frame):
         # Preloaded PDFs
         ttk.Label(self.button_frame, text="Preloaded PDFs:").pack(side="left", padx=(10, 0), pady=5)
 
+        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        pdf_dir = os.path.join(project_root, "pdfs")
+
         self.preloaded_pdfs = {
-            "Sommerville - Chapter 1": "pdfs/SE_10e_Sommerville_Ch1.pdf",
-            "Sommerville - Chapter 2": "pdfs/SE_10e_Sommerville_Ch2.pdf",
-            "Sommerville - Chapter 22": "pdfs/SE_10e_Sommerville_Ch22.pdf"
+            "Sommerville - Chapter 1": os.path.join(pdf_dir, "SE_10e_Sommerville_Ch1.pdf"),
+            "Sommerville - Chapter 2": os.path.join(pdf_dir, "SE_10e_Sommerville_Ch2.pdf"),
+            "Sommerville - Chapter 22": os.path.join(pdf_dir, "SE_10e_Sommerville_Ch22.pdf"),
         }
 
-        # Create a combobox for preloaded PDFs
+
         self.pdf_selector = ttk.Combobox(
             self.button_frame,
             values=list(self.preloaded_pdfs.keys()),
@@ -457,30 +460,17 @@ class NotesScreen(ttk.Frame):
             return
 
         # Save only the raw values
-        formatted_notes = f"{self.file_path or 'N/A'}\n{notes}"
+        #formatted_notes = f"{self.file_path or 'N/A'}\n{notes}"
 
         # Save the notes under the respective chapter and section
-        note_manager.create_note_hierarchy(chapter, section, formatted_notes)
+        note_manager.create_note_hierarchy(chapter, section, notes)
 
         messagebox.showinfo("Success", "Notes saved successfully.") # Show success message
 
     def load_notes(self): # Load notes from the database
 
         notes = note_manager.load_notes()
-        if notes: # Check if any notes exist
-            display = "\n\n".join( # Join notes for display
-                f"Chapter: {n['chapter_title']}\n"
-                f"Section: {n['section_heading']}\n"
-                f"Notes: {' '.join(n['notes'].splitlines()[1:])}"
-                for n in notes
-            )
-            self.note_text.delete("1.0", "end") # Clear the note-taking area
-            self.note_text.insert("1.0", display) # Insert the loaded notes
-        else: # If no notes exist, clear the note-taking box
-            self.note_text.delete("1.0", "end") # Clear the note-taking area
 
-            messagebox.showinfo("Loaded Notes", "No notes found.")
-            return
 
         # Create a popup window to select a note
         popup = tk.Toplevel(self)
@@ -516,19 +506,41 @@ class NotesScreen(ttk.Frame):
                     self.chapter_entry.insert(0, n["chapter_title"])
                     self.section_entry.insert(0, n["section_heading"])
 
-                    self.note_text.delete("1.0", "end")
-                    self.note_text.insert("1.0", n["notes"])
                     popup.destroy()
                     return
+            
+            new_text = database_manager.load_notes_from_menu(choice, note_manager.active_pdf)
+
+            self.note_text.delete("1.0", tk.END)
+            self.note_text.insert("1.0", new_text)
+
+            parts = choice.split(" - ")
+
+            self.chapter_entry.delete(0, "end")
+            self.chapter_entry.insert(0, parts[0])
+            self.section_entry.delete(0, "end")
+            self.section_entry.insert(0, parts[1])
+
+            popup.destroy()
 
         # Create a button to load the selected note
         ttk.Button(popup, text="Load Note", command=load_selected_note).pack(pady=10)
 
-    def delete_all_notes(self): # Delete all notes from the database
-        if messagebox.askyesno("Delete All Notes", "WARNING: Are you sure you want to delete all notes?"): # Confirm deletion
-            note_manager.delete_all_notes() # Delete all notes from the database
-            self.note_text.delete("1.0", "end") # Clear the note-taking area
-            messagebox.showinfo("Success", "All notes deleted.")
+
+    def delete_current_note(self):
+        """Delete the currently loaded note based on the chapter and section inputs."""
+        chapter = self.chapter_entry.get().strip()
+        section = self.section_entry.get().strip()
+
+        if not chapter or not section:
+            messagebox.showwarning("Warning", "Please enter both chapter and section to delete a note.")
+            return
+
+        if messagebox.askyesno("Delete Note", f"Are you sure you want to delete the note for:\n\nChapter: {chapter}\nSection: {section}?"):
+            note_manager.delete_note(chapter, section)
+            self.note_text.delete("1.0", "end")
+            messagebox.showinfo("Deleted", "The selected note has been deleted.")
+
 
     def load_notes_for_section(self):
         """Load notes for the specified chapter and section, or clear the note-taking box if none are found."""
@@ -564,6 +576,7 @@ class NotesScreen(ttk.Frame):
         """Load the selected preloaded PDF and display its first page."""
         selected = self.pdf_selector.get()
         self.pdf_selector.selection_clear()
+        note_manager.active_pdf = selected
 
         if selected in self.preloaded_pdfs: # Check if the selected PDF is in the preloaded list
             self.file_path = self.preloaded_pdfs[selected] # Get the file path of the selected PDF
@@ -571,9 +584,11 @@ class NotesScreen(ttk.Frame):
                 with fitz.open(self.file_path) as pdf: # Open the PDF file
                     self.total_pages = len(pdf) # Get the total number of pages
 
-                self.current_page = 0 # Set the current page to 0
-                self.display_page(self.current_page) # Display the first page of the PDF
-                self.load_notes_for_section()  # Automatically load notes for the PDF
+
+                self.current_page = 0
+                self.display_page(self.current_page)
+                #self.load_notes_for_section()
+
 
                 self.next_button.config(state="normal" if self.total_pages > 1 else "disabled") # Enable next button if there are multiple pages
                 self.prev_button.config(state="disabled") # Disable previous button if on the first page
@@ -586,7 +601,7 @@ class NotesScreen(ttk.Frame):
         DELETE FROM note_hierarchy
         WHERE chapter_title = :file_path
         """
-        database_manager.save_data(query, {"file_path": file_path})
+        #database_manager.save_data(query, {"file_path": file_path})
         print(f"Notes associated with the file '{file_path}' have been deleted.")
 
 class ServerSetupScreen(ttk.Frame): # Server setup screen for connecting to the database
