@@ -6,6 +6,7 @@ This class provides methods to save and load data from the database.
 import random, json, os, string
 from pymongo.mongo_client import MongoClient
 from datetime import datetime
+import certifi
 
 class DatabaseManager:
     '''
@@ -16,15 +17,16 @@ class DatabaseManager:
     def __init__(self):
         self.db_name = None 
 
-    def connect(self, db_username, db_password): # MongoDB connection string
+    def connect(self, db_username, db_password):
         uri = f"mongodb+srv://{db_username}:{db_password}@araproject.iepyikz.mongodb.net/?retryWrites=true&w=majority&appName=ARAProject"
 
-        try: # Attempt to connect to the database
-            self.client = MongoClient(uri, serverSelectionTimeoutMS=5000) # 5 second timeout
-            self.client.admin.command('ping') # Ping the server to check if it's available
-            print(f"Successfully connected as {db_username}") # Print success message
-            self.db_name = db_username # Set the database name to the username
-            self.db = self.client[self.db_name] # Set the database to the username
+        try:
+            self.client = MongoClient(uri, serverSelectionTimeoutMS=5000)
+            self.client.admin.command('ping')
+            print(f"Successfully connected as {db_username}")
+            self.db_name = db_username
+            
+            self.db = self.client[self.db_name]
             return (True, "")
         except Exception as e: # If connection fails, print the error
             print(f"Failed to connect to database as {db_username}: {e}") # Print error message
