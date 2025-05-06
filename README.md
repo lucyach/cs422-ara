@@ -54,7 +54,7 @@ This project was created as part of the CS422 course assignment for Group 1.
 ### Compilation and Execution
 1. Ensure Python 3.8+ is installed.
 2. Install dependencies using `pip install -r requirements.txt`.
-3. Run the program with `python src/windows.py`.
+3. Run the program with `python src/main.py`.
 
 ### Additional Setup
 - Ensure `creds.json` is properly configured with valid user credentials.
