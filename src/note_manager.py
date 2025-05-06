@@ -79,15 +79,11 @@ class NoteManager:
         return None
     
     def delete_note(self, chapter_title, section_heading):
-        """Delete a single note based on chapter and section."""
-        query = """
-        DELETE FROM note_hierarchy
-        WHERE chapter_title = :chapter_title AND section_heading = :section_heading
-        """
-        self.database_manager.save_data(query, {
+        """Delete a specific note from the current PDF's MongoDB collection."""
+        collection = self.database_manager.db[str(self.active_pdf)]
+        result = collection.delete_one({
             "chapter_title": chapter_title,
             "section_heading": section_heading
         })
-        print(f"Deleted note: Chapter '{chapter_title}', Section '{section_heading}'")
-
+        print(f"Deleted {result.deleted_count} note(s).")
 

@@ -206,6 +206,7 @@ class NotesScreen(ttk.Frame):
         ttk.Button(self.button_frame, text="Load PDF", command=self.load_pdf, width=15).pack(side="left", padx=5, pady=5)
         ttk.Button(self.button_frame, text="Save Notes", command=self.save_notes, width=15).pack(side="left", padx=5, pady=5)
         ttk.Button(self.button_frame, text="Load Notes", command=self.load_notes, width=15).pack(side="left", padx=5, pady=5)
+        ttk.Button(self.button_frame, text="Delete Note", command=self.delete_current_note, width=15).pack(side="left", padx=5, pady=5)
         ttk.Button(self.button_frame, text="Delete All Notes", command=self.delete_all_notes, width=20).pack(side="left", padx=5, pady=5)
 
         # SQ3R checkbox prompts
@@ -577,14 +578,19 @@ class NotesScreen(ttk.Frame):
             except Exception as e:
                 messagebox.showerror("Error", f"Failed to load PDF: {e}")
     
-    def delete_notes_for_pdf(self, file_path):
-        """Delete notes associated with a specific PDF file."""
-        query = """
-        DELETE FROM note_hierarchy
-        WHERE chapter_title = :file_path
-        """
-        #database_manager.save_data(query, {"file_path": file_path})
-        print(f"Notes associated with the file '{file_path}' have been deleted.")
+    def delete_current_note(self):
+        """Delete the currently loaded note based on the chapter and section inputs."""
+        chapter = self.chapter_entry.get().strip()
+        section = self.section_entry.get().strip()
+
+        if not chapter or not section:
+            messagebox.showwarning("Warning", "Please enter both chapter and section to delete a note.")
+            return
+
+        if messagebox.askyesno("Delete Note", f"Are you sure you want to delete the note for:\n\nChapter: {chapter}\nSection: {section}?"):
+            note_manager.delete_note(chapter, section)
+            self.note_text.delete("1.0", "end")
+            messagebox.showinfo("Deleted", "The selected note has been deleted.")
 
 class ServerSetupScreen(ttk.Frame):
     def __init__(self, parent, controller):
