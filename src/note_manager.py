@@ -23,12 +23,14 @@ class NoteManager:
             current_notes = existing_entry.get("notes", "")
             updated_notes = current_notes + "\n" + notes  # or any delimiter
 
-            result = collection.update_one(
+            result = (
                 {"chapter_title": chapter_title, "section_heading": section_heading},
                 {"$set": {"notes": updated_notes}}
             )
 
-            print("Note updated with appended content.")
+            self.database_manager.update_data(self.active_pdf, result)
+        
+            
         else:
             new_note = {
                 "chapter_title": chapter_title,
