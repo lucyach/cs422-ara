@@ -292,10 +292,11 @@ class NotesScreen(ttk.Frame):
         ttk.Label(self.button_frame, text="Preloaded PDFs:").pack(side="left", padx=(10, 0), pady=5)
 
         self.preloaded_pdfs = {
-            "Sommerville - Chapter 1": "pdfs/SE_10e_Sommerville_Ch1.pdf",
-            "Sommerville - Chapter 2": "pdfs/SE_10e_Sommerville_Ch2.pdf",
-            "Sommerville - Chapter 22": "pdfs/SE_10e_Sommerville_Ch22.pdf"
+            "Sommerville - Chapter 1": os.path.abspath("../pdfs/SE_10e_Sommerville_Ch1.pdf"),
+            "Sommerville - Chapter 2": os.path.abspath("../pdfs/SE_10e_Sommerville_Ch2.pdf"),
+            "Sommerville - Chapter 22": os.path.abspath("../pdfs/SE_10e_Sommerville_Ch22.pdf"),
         }
+
 
         self.pdf_selector = ttk.Combobox(
             self.button_frame,
@@ -551,6 +552,7 @@ class NotesScreen(ttk.Frame):
     def on_preloaded_pdf_selected(self, event):
         selected = self.pdf_selector.get()
         self.pdf_selector.selection_clear()
+        note_manager.active_pdf = selected
 
         if selected in self.preloaded_pdfs:
             self.file_path = self.preloaded_pdfs[selected]
@@ -560,7 +562,7 @@ class NotesScreen(ttk.Frame):
 
                 self.current_page = 0
                 self.display_page(self.current_page)
-                self.load_notes_for_section()
+                #self.load_notes_for_section()
 
                 self.next_button.config(state="normal" if self.total_pages > 1 else "disabled")
                 self.prev_button.config(state="disabled")
