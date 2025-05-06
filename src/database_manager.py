@@ -51,6 +51,20 @@ class DatabaseManager:
         except Exception as e: # If insertion fails, print the error
             print(f"Failed to insert data: {e}") # Print error message
             return None
+        
+    def update_data(self, collectionname, filter, data):
+        if self.db == None:
+            print("No database connection.")
+            return None
+
+        try:
+            print(self.db_name)
+            result = self.db[collectionname].update_one(filter, {"$set": data})
+            print(f"Data updated in '{self.db_name}")
+            return True
+        except Exception as e:
+            print(f"Failed to update data: {e}")
+            return None  
 
     def load_data(self, active_pdf): # Load data from the database
         if self.db is None: # Check if the database is connected
@@ -64,4 +78,33 @@ class DatabaseManager:
         except Exception as e: # If loading fails, print the error
             print(f"Failed to load data: {e}")
             return None
+        
+    def load_notes_from_menu(self, label, pdf):
+        try:
+            parts = label.split(" - ")
+            if len(parts) != 2:
+                print("Invalid label format. Expected 'chapter_title - section_heading'")
+                return None
+
+            chapter_title, section_heading = parts
+
+            collection = self.db[pdf]
+
+            doc = collection.find_one({
+                "chapter_title": chapter_title,
+                "section_heading": section_heading
+            }, {"notes": 1, "_id": 0})
+
+            if doc:
+                notes_text = doc["notes"]
+                return notes_text
+            else:
+                print("No matching note found.")
+                return None
+
+        except Exception as e:
+            print(f"Error retrieving notes: {e}")
+            return None
+
+
 
