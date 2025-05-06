@@ -53,16 +53,16 @@ class DatabaseManager:
             print(f"Failed to insert data: {e}")
             return None
         
-    def update_data(self, collectionname, data):
+    def update_data(self, collectionname, filter, data):
         if self.db == None:
             print("No database connection.")
             return None
 
         try:
             print(self.db_name)
-            result = self.db[collectionname].update_one(data)
-            print(f"Data updated into '{self.db_name}' with _id: {result.inserted_id}")
-            return result.inserted_id
+            result = self.db[collectionname].update_one(filter, {"$set": data})
+            print(f"Data updated in '{self.db_name}")
+            return True
         except Exception as e:
             print(f"Failed to update data: {e}")
             return None  

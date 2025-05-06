@@ -21,25 +21,21 @@ class NoteManager:
 
         if existing_entry:
             current_notes = existing_entry.get("notes", "")
-            updated_notes = current_notes + "\n" + notes  # or any delimiter
+            updated_notes = notes  
 
-            result = (
-                {"chapter_title": chapter_title, "section_heading": section_heading},
-                {"$set": {"notes": updated_notes}}
-            )
+            filter_query = {"chapter_title": chapter_title, "section_heading": section_heading}
+            update_fields = {"notes": updated_notes}
 
-            self.database_manager.update_data(self.active_pdf, result)
-        
-            
+            self.database_manager.update_data(self.active_pdf, filter_query, update_fields)
+
         else:
             new_note = {
                 "chapter_title": chapter_title,
                 "section_heading": section_heading,
                 "notes": notes
             }
-            result = collection.insert_one(new_note)
             self.database_manager.save_data(self.active_pdf, new_note)
-            print("New note inserted.")
+            print("New note inserted")
 
 
     def save_notes(self, chapter_title, section_heading, notes):
