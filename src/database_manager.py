@@ -65,4 +65,33 @@ class DatabaseManager:
         except Exception as e:
             print(f"Failed to load data: {e}")
             return None
+        
+    def load_notes_from_menu(self, label, pdf):
+        try:
+            parts = label.split(" - ")
+            if len(parts) != 2:
+                print("Invalid label format. Expected 'chapter_title - section_heading'")
+                return None
+
+            chapter_title, section_heading = parts
+
+            collection = self.db[pdf]
+
+            doc = collection.find_one({
+                "chapter_title": chapter_title,
+                "section_heading": section_heading
+            }, {"notes": 1, "_id": 0})
+
+            if doc:
+                notes_text = doc["notes"]
+                return notes_text
+            else:
+                print("No matching note found.")
+                return None
+
+        except Exception as e:
+            print(f"Error retrieving notes: {e}")
+            return None
+
+
 

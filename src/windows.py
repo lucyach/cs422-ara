@@ -453,6 +453,21 @@ class NotesScreen(ttk.Frame):
 
         notes = note_manager.load_notes()
 
+            # if notes:
+            #     display = "\n\n".join(
+            #         f"Chapter: {n['chapter_title']}\n"
+            #         f"Section: {n['section_heading']}\n"
+            #         f"Notes: {' '.join(n['notes'].splitlines()[1:])}"
+            #         for n in notes
+            #     )
+            #     self.note_text.delete("1.0", "end")
+            #     self.note_text.insert("1.0", display)
+            # else:
+            #     self.note_text.delete("1.0", "end")
+
+            #     messagebox.showinfo("Loaded Notes", "No notes found.")
+            #     return
+
         popup = tk.Toplevel(self)
         popup.title("Select a Note")
         popup.geometry("500x300")
@@ -475,22 +490,30 @@ class NotesScreen(ttk.Frame):
         note_dropdown.pack(pady=5)
 
         def load_selected_note():
-            print("trying to load note")
             choice = selected_note.get()
+            print(f"load_selected_notes\n{choice}")
             for n in notes:
                 label = f"{n['chapter_title']} - {n['section_heading']}"
                 if label == choice:
+                    print("if statement")
                     self.chapter_entry.delete(0, "end")
                     self.section_entry.delete(0, "end")
                     self.chapter_entry.insert(0, n["chapter_title"])
                     self.section_entry.insert(0, n["section_heading"])
 
-                    self.note_text.delete("1.0", "end")
-                    self.note_text.insert("1.0", n["notes"])
                     popup.destroy()
                     return
+            
+            new_text = database_manager.load_notes_from_menu(choice, note_manager.active_pdf)
+            self.note_text.delete("1.0", tk.END)
+            self.note_text.insert("1.0", new_text)
 
-        ttk.Button(popup, text="Load Note", command=lambda:load_selected_note).pack(pady=10)
+            popup.destroy()
+
+            
+            
+
+        ttk.Button(popup, text="Load Note", command=load_selected_note).pack(pady=10)
 
     def delete_all_notes(self):
         if messagebox.askyesno("Delete All Notes", "WARNING: Are you sure you want to delete all notes?"):
