@@ -5,6 +5,7 @@ This class provides methods to save and load data from the database.
 
 import random, json, os, string
 from pymongo.mongo_client import MongoClient
+from urllib.parse import urlparse, unquote
 from datetime import datetime
 import certifi
 
@@ -17,26 +18,27 @@ class DatabaseManager:
     def __init__(self):
         self.db_name = None 
 
-    def connect(self, db_username, db_password):
-        uri = f"mongodb+srv://{db_username}:{db_password}@araproject.iepyikz.mongodb.net/?retryWrites=true&w=majority&appName=ARAProject"
+    def connect(self, connection_string):
+        uri = connection_string
 
+        # mongodb+srv://{db_username}@araproject.iepyikz.mongodb.net/?retryWrites=true&w=majority&appName=ARAProject
         try:
             self.client = MongoClient(uri, serverSelectionTimeoutMS=5000, tlsCAFile=certifi.where()) # Connect to the MongoDB server
             self.client.admin.command('ping')
-            print(f"Successfully connected as {db_username}")
-            self.db_name = db_username
+            print(f"Successfully connected")
+            self.db_name = "Notes"
             
             self.db = self.client[self.db_name]
             return (True, "")
         except Exception as e: # If connection fails, print the error
-            print(f"Failed to connect to database as {db_username}: {e}") # Print error message
+            print(f"Failed to connect to database : {e}") # Print error message
             self.client = None
             self.db = None
             return (False, e)
 
-    def change_client(self, new_user:string, new_cred:string): # Change the database client to a new user
-        print(f"Switching to {new_user}") # Print message indicating the switch
-        success = self.connect(new_user, new_cred) # Attempt to connect to the new database
+    def change_client(self, connection_string): # Change the database client to a new user
+        print(f"Attempting connection...") # Print message indicating the switch
+        success = self.connect(connection_string) # Attempt to connect to the new database
         return success # Return success status
 
 
@@ -46,7 +48,6 @@ class DatabaseManager:
             return None
 
         try: # Attempt to insert data into the specified collection
-            print(self.db_name)
             result = self.db[collectionname].insert_one(data) # Insert data into the collection
             print(f"Data inserted into '{self.db_name}' with _id: {result.inserted_id}")
             return result.inserted_id # Return the ID of the inserted data

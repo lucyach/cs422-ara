@@ -16,4 +16,25 @@ To run the application, execute the following command in your terminal:
 python src/main.py
 ```
 
+## Server Installation
+
+The ARA application uses MongoDB to store and load notes remotely, the app is usable offline but to enable cross-device note syncing a MongoDB cluster is required.
+
+1. Create an account on MongoDB
+
+2. Create a cluster on MongoDB
+
+3. Create a database user for that cluster
+
+4. Within the network access, either:
+    - Whitelist your current IP address
+    - Allow access from all locations
+
+5. Acquire and save the connection string from your new cluster
+
+6. Within the app's main menu screen, open the "Server Setup" window. Input the connection string that contains the user credentials to your database.
+
+7. Done, enjoy using the ARA application!
+
+
 Note: You may have to use `python3` and `pip3` if using the latest Python version.

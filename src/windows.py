@@ -24,11 +24,9 @@ text_font = "Segoe UI", 10
 database_manager = DatabaseManager()  # Initialize the database manager
 pdf_manager = PDFManager()
 note_manager = NoteManager(database_manager)  # Pass the database manager to NoteManager
+note_manager.initialize_note_folder()
 
-
-default_creds = {"ARAUser1": "",
-                 "ARAUser2": "",
-                 "ARAUser3": ""}
+default_creds = {}
 
 
 script_dir = os.path.dirname(__file__)  # Folder where script is located
@@ -38,6 +36,7 @@ try: # Attempt to load the credentials from a JSON file
     with open(file_path, 'r') as file: # Open the JSON file
             default_creds = json.load(file) # Load the credentials into a dictionary
 except: #   If the file is not found, print an error message
+    note_manager.offline_mode = True
     print("Error, no credential file found!")
 
 class ARA(tk.Tk):
@@ -45,8 +44,6 @@ class ARA(tk.Tk):
         super().__init__()
         self.title("ARA - Active Reading Assistant") # Set the window title
         self.geometry("1200x800") # Set the window size
-
-        database_manager.connect("ARAUser1", default_creds.get("ARAUser1")) #  Connect to the database with default credentials
 
         # Set up the main window layout
         self.grid_rowconfigure(0, weight=1)
@@ -471,7 +468,6 @@ class NotesScreen(ttk.Frame):
 
         notes = note_manager.load_notes()
 
-
         # Create a popup window to select a note
         popup = tk.Toplevel(self)
         popup.title("Select a Note")
@@ -613,11 +609,15 @@ class ServerSetupScreen(ttk.Frame): # Server setup screen for connecting to the 
         label = ttk.Label(self, text="Server Setup Page", style="Header.TLabel")
         label.pack(pady=20)
 
+        self.custom_input = tk.Text(self, height=1, width=40)
+        self.custom_input.pack()
+
         # Placeholder server setup info
         instructions = ttk.Label(self, text="Select a user to connect:")
         instructions.pack(pady=10)
 
-        self.user_selector = ttk.Combobox(self, values=["ARAUser1", "ARAUser2", "ARAUser3"], state="readonly", width=30, style="CustomCombobox.TCombobox")
+        self.usernames = list(default_creds.keys())
+        self.user_selector = ttk.Combobox(self, values=self.usernames, state="readonly", width=30, style="CustomCombobox.TCombobox")
         self.user_selector.set("Choose a User")
         self.user_selector.pack(pady=10)
 
@@ -628,14 +628,19 @@ class ServerSetupScreen(ttk.Frame): # Server setup screen for connecting to the 
         back_btn = ttk.Button(self, text="Back to Menu", command=lambda: controller.show_frame(MainMenu))
         back_btn.pack(pady=10)
 
-        self.status_label = ttk.Label(self, text="Connected to ARAUser1 by default", justify="center", foreground="white")
+        self.status_label = ttk.Label(self, text="In the textbox above, input the connection string from your database.", justify="center", foreground="white")
         self.status_label.pack()
 
     def connection_verification(self): # Verify the connection to the database
         user = self.user_selector.get() # Get the selected user from the combobox
         creds = default_creds.get(user) # Get the credentials for the selected user
+
+        test= self.custom_input.get("1.0", "end-1c")
+        print(test)
+
+
         
-        value = database_manager.change_client(user, creds) # Attempt to connect to the database with the selected user and credentials
+        value = database_manager.change_client(test) # Attempt to connect to the database with the selected user and credentials
         
         if value[0] == True: # If the connection is successful
             self.status_label.config(text=f"Successfully connected as {user}", foreground="green")

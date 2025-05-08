@@ -3,11 +3,23 @@ Note Manager Module
 This module manages the creation, saving, and loading of notes.
 """
 
+import os
+
 class NoteManager:
     def __init__(self, database_manager):
 
         self.database_manager = database_manager
         self.active_pdf = "Notes"
+        self.offline_mode = False
+
+    def initialize_note_folder(self):
+
+        parent_dir = os.path.join(os.getcwd(), '..')
+        folder_path = os.path.join(parent_dir, 'notes')
+        folder_path = os.path.abspath(folder_path)
+
+        os.makedirs(folder_path, exist_ok=True)
+
 
 
     def create_note_hierarchy(self, chapter_title, section_heading, notes):
@@ -28,7 +40,11 @@ class NoteManager:
             filter_query = {"chapter_title": chapter_title, "section_heading": section_heading}
             update_fields = {"notes": updated_notes}
 
-            self.database_manager.update_data(self.active_pdf, filter_query, update_fields)
+
+            if self.offline_mode:
+                print("offlinesaving")
+            else:
+                self.database_manager.update_data(self.active_pdf, filter_query, update_fields)
 
         else:
             new_note = {
