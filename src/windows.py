@@ -35,9 +35,9 @@ file_path = os.path.join(script_dir, 'creds.json') # Path to the credentials fil
 try: # Attempt to load the credentials from a JSON file
     with open(file_path, 'r') as file: # Open the JSON file
             default_creds = json.load(file) # Load the credentials into a dictionary
-            credsjson = file
 except: #   If the file is not found, print an error message
-    print("Error, no credential file found!")
+    with open(file_path, 'w') as file:
+        json.dump(default_creds, file, indent=4)
 
 class ARA(tk.Tk):
     def __init__(self):
@@ -460,13 +460,21 @@ class NotesScreen(ttk.Frame):
         #formatted_notes = f"{self.file_path or 'N/A'}\n{notes}"
 
         # Save the notes under the respective chapter and section
-        note_manager.create_note_hierarchy(chapter, section, notes)
+        result = note_manager.create_note_hierarchy(chapter, section, notes)
+
+        if database_manager.connected == False:
+            messagebox.showerror("Error", "No server connection, please see the Server Setup page.")
+            return
 
         messagebox.showinfo("Success", "Notes saved successfully.") # Show success message
 
     def load_notes(self): # Load notes from the database
 
         notes = note_manager.load_notes()
+
+        if database_manager.connected == False:
+            messagebox.showerror("Error", "No server connection, please see the Server Setup page.")
+            return
 
         # Create a popup window to select a note
         popup = tk.Toplevel(self)
@@ -529,7 +537,7 @@ class NotesScreen(ttk.Frame):
         section = self.section_entry.get().strip()
 
         if not chapter or not section:
-            messagebox.showwarning("Warning", "Please enter both chapter and section to delete a note.")
+            messagebox.showwarning("Warning", "Please load the note to delete.")
             return
 
         if messagebox.askyesno("Delete Note", f"Are you sure you want to delete the note for:\n\nChapter: {chapter}\nSection: {section}?"):
@@ -609,8 +617,14 @@ class ServerSetupScreen(ttk.Frame): # Server setup screen for connecting to the 
         label = ttk.Label(self, text="Server Setup Page", style="Header.TLabel")
         label.pack(pady=20)
 
+        description = ttk.Label(self, text="Input your database connection string to add it to the dropdown list, or select from 3 pre-defined users.\nSee the installation document for more information.", justify="center")
+        description.pack(pady=10)
+
         self.custom_input = tk.Text(self, height=1, width=40)
-        self.custom_input.pack()
+        self.custom_input.pack(pady=10)
+
+        acc_add_btn = ttk.Button(self, text="Add User", command=lambda:self.update_users(self.custom_input.get("1.0", "end-1c")))        
+        acc_add_btn.pack(pady=10)
 
         # Placeholder server setup info
         instructions = ttk.Label(self, text="Select a user to connect:")
@@ -628,20 +642,18 @@ class ServerSetupScreen(ttk.Frame): # Server setup screen for connecting to the 
         back_btn = ttk.Button(self, text="Back to Menu", command=lambda: controller.show_frame(MainMenu))
         back_btn.pack(pady=10)
 
-        self.status_label = ttk.Label(self, text="In the textbox above, input the connection string from your database.", justify="center", foreground="white")
-        self.status_label.pack()
+        self.status_label = ttk.Label(self, text="", justify="center", foreground="white")
+        self.status_label.pack(pady=30)
 
     def connection_verification(self): # Verify the connection to the database
         user = self.user_selector.get() # Get the selected user from the combobox
+
+        if user == "Choose a User":
+            return
+
         creds = default_creds.get(user) # Get the credentials for the selected user
 
-        test= self.custom_input.get("1.0", "end-1c")
-        
-        parsed = urlparse(test)
-        userinfo = parsed.netloc.split('@')[0]
-        username = userinfo.split(':')[0]
-        
-        value = database_manager.change_client(test) # Attempt to connect to the database with the selected user and credentials
+        value = database_manager.change_client(creds) # Attempt to connect to the database with the selected user and credentials
         
         if value[0] == True: # If the connection is successful
             self.status_label.config(text=f"Successfully connected as {user}", foreground="green")
@@ -649,11 +661,41 @@ class ServerSetupScreen(ttk.Frame): # Server setup screen for connecting to the 
             self.status_label.config(text=f"Failed to connect as {user}:\n{value[1]}", justify="center",foreground="orange")
 
     def update_users(self, newuser):
-        print("asbdoasbdoisadb")
-        self.usernames = list(default_creds.keys())
-        self.user_selector.config(values=self.usernames)
-        with open(file_path, 'w') as file:
-            json.dump()
+
+        parsed = urlparse(newuser)
+        userinfo = parsed.netloc.split('@')[0]
+        username = userinfo.split(':')[0]
+
+        if username == "":
+            print("Error: Invalid username")
+            self.status_label.config(text=f"Failed to add inputted user!", justify="center",foreground="orange")
+            return
+
+        try:
+            # Load the existing JSON file
+            with open(file_path, "r") as f:
+                creds = json.load(f)
+
+            # Add or update the new user
+            creds[username] = newuser
+
+            # Save the updated JSON back to file
+            with open(file_path, "w") as f:
+                json.dump(creds, f, indent=4)
+
+            default_creds = creds
+
+            print(f"creds: {creds}\ndefault_creds: {default_creds}")
+
+            # Update UI status
+            self.status_label.config(text=f"Successfully added {username}", foreground="green")
+            self.usernames = list(default_creds.keys())
+            self.user_selector.config(values=self.usernames)
+
+        except Exception as e:
+            print(f"Error updating JSON: {e}")
+            self.status_label.config(text=f"Error updating user file!", foreground="red")
+            
 
 
 class AboutScreen(ttk.Frame): # About screen for the application

@@ -15,7 +15,8 @@ class DatabaseManager:
 
     '''
     def __init__(self):
-        self.db_name = None 
+        self.db_name = None
+        self.connected = False 
 
     def connect(self, connection_string):
         uri = connection_string
@@ -26,8 +27,8 @@ class DatabaseManager:
             self.client.admin.command('ping')
             print(f"Successfully connected")
             self.db_name = "Notes"
-            
             self.db = self.client[self.db_name]
+            self.connected = True
             return (True, "")
         except Exception as e: # If connection fails, print the error
             print(f"Failed to connect to database : {e}") # Print error message
@@ -42,8 +43,8 @@ class DatabaseManager:
 
 
     def save_data(self, collectionname, data): # Save data to the database
-        if self.db == None: # Check if the database is connected
-            print("No database connection.")
+        if self.connected == False: # Check if the database is connected
+            print("No database connection")
             return None
 
         try: # Attempt to insert data into the specified collection
@@ -55,7 +56,7 @@ class DatabaseManager:
             return None
         
     def update_data(self, collectionname, filter, data):
-        if self.db == None:
+        if self.connected == False:
             print("No database connection.")
             return None
 
@@ -69,7 +70,7 @@ class DatabaseManager:
             return None  
 
     def load_data(self, active_pdf): # Load data from the database
-        if self.db is None: # Check if the database is connected
+        if self.connected == False: # Check if the database is connected
             print("No database connection.")
             return None
         try: # Attempt to find all documents in the specified collection

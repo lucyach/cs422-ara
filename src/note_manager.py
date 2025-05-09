@@ -10,7 +10,6 @@ class NoteManager:
 
         self.database_manager = database_manager
         self.active_pdf = "Notes"
-        self.offline_mode = False
 
     def initialize_note_folder(self):
 
@@ -24,6 +23,11 @@ class NoteManager:
 
     def create_note_hierarchy(self, chapter_title, section_heading, notes):
         """Create or update a hierarchical structure for notes."""
+
+        if self.database_manager.connected == False:
+            print("No database connection")
+            return None
+
         collection = self.database_manager.db[str(self.active_pdf)] # Get the active PDF collection
 
         # Check if a note for this chapter and section already exists
@@ -41,12 +45,10 @@ class NoteManager:
             update_fields = {"notes": updated_notes}
 
 
-            if self.offline_mode:
-                print("offlinesaving")
-            else:
-                self.database_manager.update_data(self.active_pdf, filter_query, update_fields)
+            self.database_manager.update_data(self.active_pdf, filter_query, update_fields)
 
         else:
+
             new_note = {
 
                 "chapter_title": chapter_title,
