@@ -20,7 +20,7 @@ python src/main.py
 
 The ARA application uses MongoDB to store and load notes remotely, the app is usable offline but to enable cross-device note syncing a MongoDB cluster is required.
 
-1. Create an account on MongoDB
+1. Create an account on MongoDB Atlas
 
 2. Create a cluster on MongoDB
 

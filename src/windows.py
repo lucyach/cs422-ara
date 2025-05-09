@@ -3,6 +3,7 @@ from tkinter import messagebox, filedialog
 from tkinter import ttk
 from pdf_manager import PDFManager
 from note_manager import NoteManager
+from urllib.parse import urlparse, unquote
 from PIL import Image, ImageTk
 import fitz  # PyMuPDF library for handling PDFs
 import json, os
@@ -28,15 +29,14 @@ note_manager.initialize_note_folder()
 
 default_creds = {}
 
-
 script_dir = os.path.dirname(__file__)  # Folder where script is located
 file_path = os.path.join(script_dir, 'creds.json') # Path to the credentials file
 
 try: # Attempt to load the credentials from a JSON file
     with open(file_path, 'r') as file: # Open the JSON file
             default_creds = json.load(file) # Load the credentials into a dictionary
+            credsjson = file
 except: #   If the file is not found, print an error message
-    note_manager.offline_mode = True
     print("Error, no credential file found!")
 
 class ARA(tk.Tk):
@@ -636,9 +636,10 @@ class ServerSetupScreen(ttk.Frame): # Server setup screen for connecting to the 
         creds = default_creds.get(user) # Get the credentials for the selected user
 
         test= self.custom_input.get("1.0", "end-1c")
-        print(test)
-
-
+        
+        parsed = urlparse(test)
+        userinfo = parsed.netloc.split('@')[0]
+        username = userinfo.split(':')[0]
         
         value = database_manager.change_client(test) # Attempt to connect to the database with the selected user and credentials
         
@@ -646,6 +647,13 @@ class ServerSetupScreen(ttk.Frame): # Server setup screen for connecting to the 
             self.status_label.config(text=f"Successfully connected as {user}", foreground="green")
         else:
             self.status_label.config(text=f"Failed to connect as {user}:\n{value[1]}", justify="center",foreground="orange")
+
+    def update_users(self, newuser):
+        print("asbdoasbdoisadb")
+        self.usernames = list(default_creds.keys())
+        self.user_selector.config(values=self.usernames)
+        with open(file_path, 'w') as file:
+            json.dump()
 
 
 class AboutScreen(ttk.Frame): # About screen for the application

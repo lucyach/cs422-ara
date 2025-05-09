@@ -5,7 +5,6 @@ This class provides methods to save and load data from the database.
 
 import random, json, os, string
 from pymongo.mongo_client import MongoClient
-from urllib.parse import urlparse, unquote
 from datetime import datetime
 import certifi
 
