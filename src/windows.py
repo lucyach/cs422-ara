@@ -598,15 +598,6 @@ class NotesScreen(ttk.Frame):
                 self.prev_button.config(state="disabled") # Disable previous button if on the first page
             except Exception as e: # Handle any errors that occur during PDF loading
                 messagebox.showerror("Error", f"Failed to load PDF: {e}")
-    
-    def delete_notes_for_pdf(self, file_path):
-        """Delete notes associated with a specific PDF file."""
-        query = """
-        DELETE FROM note_hierarchy
-        WHERE chapter_title = :file_path
-        """
-        #database_manager.save_data(query, {"file_path": file_path})
-        print(f"Notes associated with the file '{file_path}' have been deleted.")
 
 class ServerSetupScreen(ttk.Frame): # Server setup screen for connecting to the database
     def __init__(self, parent, controller):
@@ -646,12 +637,14 @@ class ServerSetupScreen(ttk.Frame): # Server setup screen for connecting to the 
         self.status_label.pack(pady=30)
 
     def connection_verification(self): # Verify the connection to the database
+        global default_creds
         user = self.user_selector.get() # Get the selected user from the combobox
 
         if user == "Choose a User":
             return
 
         creds = default_creds.get(user) # Get the credentials for the selected user
+        print(f"creds = {creds}")
 
         value = database_manager.change_client(creds) # Attempt to connect to the database with the selected user and credentials
         
@@ -661,6 +654,8 @@ class ServerSetupScreen(ttk.Frame): # Server setup screen for connecting to the 
             self.status_label.config(text=f"Failed to connect as {user}:\n{value[1]}", justify="center",foreground="orange")
 
     def update_users(self, newuser):
+        
+        global default_creds
 
         parsed = urlparse(newuser)
         userinfo = parsed.netloc.split('@')[0]
@@ -684,8 +679,6 @@ class ServerSetupScreen(ttk.Frame): # Server setup screen for connecting to the 
                 json.dump(creds, f, indent=4)
 
             default_creds = creds
-
-            print(f"creds: {creds}\ndefault_creds: {default_creds}")
 
             # Update UI status
             self.status_label.config(text=f"Successfully added {username}", foreground="green")
@@ -736,7 +729,3 @@ class AboutScreen(ttk.Frame): # About screen for the application
         # Back button
         back_btn = ttk.Button(self, text="Back to Menu", command=lambda: controller.show_frame(MainMenu))
         back_btn.pack(pady=20)
-
-# if __name__ == "__main__":
-#     app = ARA()
-#     app.mainloop()
